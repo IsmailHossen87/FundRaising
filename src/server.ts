@@ -6,6 +6,7 @@ import config from './config';
 import { seedSuperAdmin } from './DB/seedAdmin';
 import { socketHelper } from './helpers/socketHelper';
 import { errorLogger, logger } from './shared/logger';
+import { connectRedis } from './config/radisConfig';
 
 //uncaught exception
 process.on('uncaughtException', error => {
@@ -59,7 +60,11 @@ try {
   });
 }
 
-main();
+(async () => {
+    await connectRedis()
+    await main()
+}
+)()
 
 //SIGTERM
 process.on('SIGTERM', () => {

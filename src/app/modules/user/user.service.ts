@@ -8,34 +8,46 @@ import unlinkFile from '../../../shared/unlinkFile';
 import generateOTP from '../../../util/generateOTP';
 import { IUser } from './user.interface';
 import { User } from './user.model';
+import { redisClient } from '../../../config/radisConfig';
+
+const OTP_EXPIRATION = 2 * 60; // 2 minutes in seconds
 
 const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
-  //set role
+  console.log('Creating user with payload:', payload); // Log the payload for debugging
+  
+  // Set role
   payload.role = USER_ROLES.USER;
+
   const createUser = await User.create(payload);
   if (!createUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
   }
+  console.log('User created successfully:', createUser);
 
-  //send email
+  // Generate OTP
   const otp = generateOTP();
+  console.log('Generated OTP:', otp); // Log OTP for debugging
+  
   const values = {
     name: createUser.name,
     otp: otp,
     email: createUser.email!,
   };
-  const createAccountTemplate = emailTemplate.createAccount(values);
-  emailHelper.sendEmail(createAccountTemplate);
+  
+  const redisKey = `otp:${createUser.email!}`;
+  
+  // Save OTP to Redis with 2-minute expiration
+  console.log(`Saving OTP to Redis with key: ${redisKey}`);
+  await redisClient.setEx(redisKey, OTP_EXPIRATION, otp.toString()); // 'setEx' ব্যবহার করে
 
-  //save to DB
-  const authentication = {
-    oneTimeCode: otp,
-    expireAt: new Date(Date.now() + 3 * 60000),
-  };
-  await User.findOneAndUpdate(
-    { _id: createUser._id },
-    { $set: { authentication } }
-  );
+  console.log(`OTP saved to Redis with expiration time of ${OTP_EXPIRATION} seconds`);
+
+  // Send email
+  const createAccountTemplate = emailTemplate.createAccount(values);
+  console.log('Email template created:', createAccountTemplate); // Log email template
+  
+  emailHelper.sendEmail(createAccountTemplate);
+  console.log('OTP email sent to:', createUser.email);
 
   return createUser;
 };

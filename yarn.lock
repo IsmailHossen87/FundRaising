@@ -725,6 +725,33 @@
   resolved "https://registry.npmjs.org/@pkgjs/parseargs/-/parseargs-0.11.0.tgz"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
+"@redis/bloom@5.8.3":
+  version "5.8.3"
+  resolved "https://registry.npmjs.org/@redis/bloom/-/bloom-5.8.3.tgz"
+  integrity sha512-1eldTzHvdW3Oi0TReb8m1yiFt8ZwyF6rv1NpZyG5R4TpCwuAdKQetBKoCw7D96tNFgsVVd6eL+NaGZZCqhRg4g==
+
+"@redis/client@^5.8.3", "@redis/client@5.8.3":
+  version "5.8.3"
+  resolved "https://registry.npmjs.org/@redis/client/-/client-5.8.3.tgz"
+  integrity sha512-MZVUE+l7LmMIYlIjubPosruJ9ltSLGFmJqsXApTqPLyHLjsJUSAbAJb/A3N34fEqean4ddiDkdWzNu4ZKPvRUg==
+  dependencies:
+    cluster-key-slot "1.1.2"
+
+"@redis/json@5.8.3":
+  version "5.8.3"
+  resolved "https://registry.npmjs.org/@redis/json/-/json-5.8.3.tgz"
+  integrity sha512-DRR09fy/u8gynHGJ4gzXYeM7D8nlS6EMv5o+h20ndTJiAc7RGR01fdk2FNjnn1Nz5PjgGGownF+s72bYG4nZKQ==
+
+"@redis/search@5.8.3":
+  version "5.8.3"
+  resolved "https://registry.npmjs.org/@redis/search/-/search-5.8.3.tgz"
+  integrity sha512-EMIvEeGRR2I0BJEz4PV88DyCuPmMT1rDtznlsHY3cKSDcc9vj0Q411jUnX0iU2vVowUgWn/cpySKjpXdZ8m+5g==
+
+"@redis/time-series@5.8.3":
+  version "5.8.3"
+  resolved "https://registry.npmjs.org/@redis/time-series/-/time-series-5.8.3.tgz"
+  integrity sha512-5Jwy3ilsUYQjzpE7WZ1lEeG1RkqQ5kHtwV1p8yxXHSEmyUbC/T/AVgyjMcm52Olj/Ov/mhDKjx6ndYUi14bXsw==
+
 "@sigstore/bundle@^3.1.0":
   version "3.1.0"
   dependencies:
@@ -1804,6 +1831,11 @@ cli-columns@^4.0.0:
   dependencies:
     string-width "^4.2.3"
     strip-ansi "^6.0.1"
+
+cluster-key-slot@1.1.2:
+  version "1.1.2"
+  resolved "https://registry.npmjs.org/cluster-key-slot/-/cluster-key-slot-1.1.2.tgz"
+  integrity sha512-RMr0FhtfXemyinomL4hrWcYJxmX6deFdCxpJzhDttxgO1+bcCnkk+9drydLVDmAMG7NE6aN/fl4F7ucU/90gAA==
 
 cmd-shim@^7.0.0:
   version "7.0.0"
@@ -3889,6 +3921,17 @@ readdirp@~3.6.0:
   integrity sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==
   dependencies:
     picomatch "^2.2.1"
+
+redis@^5.8.3:
+  version "5.8.3"
+  resolved "https://registry.npmjs.org/redis/-/redis-5.8.3.tgz"
+  integrity sha512-MfSrfV6+tEfTw8c4W0yFp6XWX8Il4laGU7Bx4kvW4uiYM1AuZ3KGqEGt1LdQHeD1nEyLpIWetZ/SpY3kkbgrYw==
+  dependencies:
+    "@redis/bloom" "5.8.3"
+    "@redis/client" "5.8.3"
+    "@redis/json" "5.8.3"
+    "@redis/search" "5.8.3"
+    "@redis/time-series" "5.8.3"
 
 resolve-from@^4.0.0:
   version "4.0.0"
