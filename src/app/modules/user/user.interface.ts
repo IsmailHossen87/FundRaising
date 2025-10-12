@@ -7,10 +7,27 @@ export type IUser = {
   contact: string;
   email: string;
   password: string;
-  location: string;
   image?: string;
+  bio?: string;
   status: 'active' | 'delete';
   verified: boolean;
+
+  personalInfo?: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    bio?: string;
+  };
+
+  address?: {
+    country?: string;
+    city?: string;
+    postalCode?: string;
+    street?: string;
+  };
+
+  location?: string;
+
   authentication?: {
     isResetPassword: boolean;
     oneTimeCode: number | null;

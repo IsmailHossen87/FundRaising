@@ -246,7 +246,7 @@ const changePasswordToDB = async (
 };
 
 
-export const AuthService = {
+ export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
   forgetPasswordToDB,
