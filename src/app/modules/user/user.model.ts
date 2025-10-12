@@ -15,13 +15,17 @@ const userSchema = new Schema<IUser, UserModal>(
     role: {
       type: String,
       enum: Object.values(USER_ROLES),
-      required: true,
+      default:USER_ROLES.USER,
     },
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
+    },
+    contact: {
+      type: String,
+      default: '',
     },
     password: {
       type: String,
@@ -33,6 +37,10 @@ const userSchema = new Schema<IUser, UserModal>(
       type: String,
       default: 'https://i.ibb.co/z5YHLV9/profile.png',
     },
+    bio: {
+      type: String,
+      default: '',
+    },
     status: {
       type: String,
       enum: ['active', 'delete'],
@@ -42,20 +50,23 @@ const userSchema = new Schema<IUser, UserModal>(
       type: Boolean,
       default: false,
     },
+    personalInfo: {
+      firstName: { type: String, default: '' },
+      lastName: { type: String, default: '' },
+      phone: { type: String, default: '' },
+      bio: { type: String, default: '' },
+    },
+    address: {
+      country: { type: String, default: '' },
+      city: { type: String, default: '' },
+      postalCode: { type: String, default: '' },
+      street: { type: String, default: '' },
+    },
     authentication: {
       type: {
-        isResetPassword: {
-          type: Boolean,
-          default: false,
-        },
-        oneTimeCode: {
-          type: Number,
-          default: null,
-        },
-        expireAt: {
-          type: Date,
-          default: null,
-        },
+        isResetPassword: { type: Boolean, default: false },
+        oneTimeCode: { type: Number, default: null },
+        expireAt: { type: Date, default: null },
       },
       select: 0,
     },
@@ -63,18 +74,16 @@ const userSchema = new Schema<IUser, UserModal>(
   { timestamps: true, versionKey: false }
 );
 
-//exist user check
+// check user exists
 userSchema.statics.isExistUserById = async (id: string) => {
-  const isExist = await User.findById(id);
-  return isExist;
+  return await User.findById(id);
 };
 
 userSchema.statics.isExistUserByEmail = async (email: string) => {
-  const isExist = await User.findOne({ email });
-  return isExist;
+  return await User.findOne({ email });
 };
 
-//is match password
+// match password
 userSchema.statics.isMatchPassword = async (
   password: string,
   hashPassword: string
@@ -82,15 +91,13 @@ userSchema.statics.isMatchPassword = async (
   return await bcrypt.compare(password, hashPassword);
 };
 
-//check user
+// pre-save hook
 userSchema.pre('save', async function (next) {
-  //check user
   const isExist = await User.findOne({ email: this.email });
   if (isExist) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exist!');
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exists!');
   }
 
-  //password hash
   this.password = await bcrypt.hash(
     this.password,
     Number(config.bcrypt_salt_rounds)
