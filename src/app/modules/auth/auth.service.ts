@@ -17,15 +17,13 @@ import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
 import { redisClient } from '../../../config/radisConfig';
-import { USER_ROLES } from '../../../enums/user';
+
 
 const OTP_EXPIRATION = 5 * 60; // 5 minutes
 
 
-
-// ========================
 // Login User
-// ========================
+
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
   const isExistUser = await User.findOne({ email }).select('+password');
@@ -61,9 +59,9 @@ const loginUserFromDB = async (payload: ILoginData) => {
   return { createToken };
 };
 
-// ========================
+
 // Verify Email or OTP
-// ========================
+
 const verifyEmailToDB = async (payload: IVerifyEmail) => {
   const { email, oneTimeCode } = payload;
   const isExistUser = await User.findOne({ email }).select('+authentication');
@@ -128,9 +126,8 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   return { data, message };
 };
 
-// ========================
 // Forget Password (Send OTP)
-// ========================
+
 const forgetPasswordToDB = async (email: string) => {
   const isExistUser = await User.isExistUserByEmail(email);
   if (!isExistUser) {
@@ -148,9 +145,8 @@ const forgetPasswordToDB = async (email: string) => {
   return { message: 'OTP sent to your email.' };
 };
 
-// ========================
 // Reset Password
-// ========================
+
 const resetPasswordToDB = async (
   token: string,
   payload: IAuthResetPassword
@@ -202,9 +198,9 @@ const resetPasswordToDB = async (
   });
 };
 
-// ========================
+
 // Change Password
-// ========================
+
 const changePasswordToDB = async (
   user: JwtPayload,
   payload: IChangePassword
@@ -249,9 +245,7 @@ const changePasswordToDB = async (
   );
 };
 
-// ========================
-// Export Service
-// ========================
+
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
