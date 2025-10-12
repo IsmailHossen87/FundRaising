@@ -60,7 +60,7 @@ const userSchema = new Schema<IUser, UserModal>(
       select: 0,
     },
   },
-  { timestamps: true ,versionKey:false}
+  { timestamps: true, versionKey: false }
 );
 
 //exist user check

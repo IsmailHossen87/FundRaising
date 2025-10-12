@@ -10,48 +10,31 @@ import { IUser } from './user.interface';
 import { User } from './user.model';
 import { redisClient } from '../../../config/radisConfig';
 
-const OTP_EXPIRATION = 2 * 60; // 2 minutes in seconds
+const OTP_EXPIRATION = 2 * 60;
 
 const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
-  console.log('Creating user with payload:', payload); // Log the payload for debugging
-  
-  // Set role
   payload.role = USER_ROLES.USER;
 
   const createUser = await User.create(payload);
   if (!createUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
   }
-  console.log('User created successfully:', createUser);
 
-  // Generate OTP
   const otp = generateOTP();
-  console.log('Generated OTP:', otp); // Log OTP for debugging
-  
+  const redisKey = `otp:verify:${createUser.email}`;
+  await redisClient.setEx(redisKey, OTP_EXPIRATION, otp.toString());
+
   const values = {
     name: createUser.name,
-    otp: otp,
+    otp,
     email: createUser.email!,
   };
-  
-  const redisKey = `otp:${createUser.email!}`;
-  
-  // Save OTP to Redis with 2-minute expiration
-  console.log(`Saving OTP to Redis with key: ${redisKey}`);
-  await redisClient.setEx(redisKey, OTP_EXPIRATION, otp.toString()); // 'setEx' ব্যবহার করে
 
-  console.log(`OTP saved to Redis with expiration time of ${OTP_EXPIRATION} seconds`);
-
-  // Send email
   const createAccountTemplate = emailTemplate.createAccount(values);
-  console.log('Email template created:', createAccountTemplate); // Log email template
-  
-  emailHelper.sendEmail(createAccountTemplate);
-  console.log('OTP email sent to:', createUser.email);
+  await emailHelper.sendEmail(createAccountTemplate);
 
   return createUser;
 };
-
 const getUserProfileFromDB = async (
   user: JwtPayload
 ): Promise<Partial<IUser>> => {
