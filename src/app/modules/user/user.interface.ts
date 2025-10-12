@@ -13,8 +13,8 @@ export type IUser = {
   verified: boolean;
   authentication?: {
     isResetPassword: boolean;
-    oneTimeCode: number;
-    expireAt: Date;
+    oneTimeCode: number | null;
+    expireAt: Date | null;
   };
 };
 
