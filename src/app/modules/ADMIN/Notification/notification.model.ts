@@ -5,7 +5,6 @@ const notificationSchema = new Schema<INotification>({
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
   },
   type: {
     type: String,
@@ -33,6 +32,8 @@ const notificationSchema = new Schema<INotification>({
     enum: ['Active', 'Closed', 'Winner Announced'],
     default: 'Active',
   },
+},{
+  versionKey:false,timestamps:true
 });
 
 const Notification = model<INotification>('Notification', notificationSchema);

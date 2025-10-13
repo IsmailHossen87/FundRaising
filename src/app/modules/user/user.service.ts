@@ -46,6 +46,15 @@ const getUserProfileFromDB = async (
 
   return isExistUser;
 };
+const getAllUser = async () => {
+
+  const isExistUser = await User.find();
+  if (!isExistUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+  }
+
+  return isExistUser;
+};
 
 const updateProfileToDB = async (
   user: JwtPayload,
@@ -72,6 +81,7 @@ const updateProfileToDB = async (
 export const UserService = {
   createUserToDB,
   getUserProfileFromDB,
+  getAllUser,
   updateProfileToDB,
 };
 

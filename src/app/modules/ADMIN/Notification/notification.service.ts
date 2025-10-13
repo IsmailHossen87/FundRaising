@@ -7,6 +7,7 @@ import Notification from './notification.model';
 const createNotification = async (
   payload: INotification
 ): Promise<INotification> => {
+  console.log("Request Payload:", payload); 
   const result = await Notification.create(payload);
   if (!result) {
     throw new ApiError(
@@ -24,15 +25,18 @@ const getAllNotifications = async (
   queryFields: Record<string, any>,
   user: any
 ): Promise<any> => {
-  const { search, page, limit } = queryFields;
+  const { search, page, limit, ...filters } = queryFields;
+
   const query = search
     ? {
         $or: [
-          { description: { $regex: search, $options: 'i' } },
+          { type: { $regex: search, $options: 'i' } },
           { title: { $regex: search, $options: 'i' } },
+          { recipientGroup: { $regex: search, $options: 'i' } },
         ],
+        ...filters,
       }
-    : {};
+    : { ...filters };
 
   let queryBuilder = Notification.find(query);
 
@@ -44,10 +48,11 @@ const getAllNotifications = async (
     queryBuilder = queryBuilder.skip(0).limit(10);
   }
 
-  queryBuilder = queryBuilder.find({
-    ...queryFields,
-    ...(user.role === USER_ROLES.ADMIN ? {} : { user: user.id }),
-  }).sort({ createdAt: -1 });
+  if (user.role !== USER_ROLES.ADMIN) {
+    queryBuilder = queryBuilder.find({ user: user.id });
+  }
+
+  queryBuilder = queryBuilder.sort({ createdAt: -1 });
 
   // Update notifications status to 'read' for non-admin users
   if (user.role !== USER_ROLES.ADMIN) {
@@ -59,7 +64,7 @@ const getAllNotifications = async (
 
   const result = await queryBuilder;
   const totalNotification = await Notification.countDocuments(query);
-  const totalPages = Math.ceil(totalNotification / Number(limit));
+  const totalPages = limit ? Math.ceil(totalNotification / Number(limit)) : 1;
 
   return {
     result,
@@ -71,6 +76,7 @@ const getAllNotifications = async (
     },
   };
 };
+
 
 const getNotificationById = async (
   id: string

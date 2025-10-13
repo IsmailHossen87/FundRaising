@@ -43,8 +43,8 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     status: {
       type: String,
-      enum: ['active', 'delete'],
-      default: 'active',
+      enum: ['Active', 'Blocked'],
+      default: 'Blocked',
     },
     verified: {
       type: Boolean,
@@ -92,17 +92,17 @@ userSchema.statics.isMatchPassword = async (
 };
 
 // pre-save hook
-userSchema.pre('save', async function (next) {
-  const isExist = await User.findOne({ email: this.email });
-  if (isExist) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exists!');
-  }
+// userSchema.pre('save', async function (next) {
+//   const isExist = await User.findOne({ email: this.email });
+//   if (isExist) {
+//     throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already exists!');
+//   }
 
-  this.password = await bcrypt.hash(
-    this.password,
-    Number(config.bcrypt_salt_rounds)
-  );
-  next();
-});
+//   this.password = await bcrypt.hash(
+//     this.password,
+//     Number(config.bcrypt_salt_rounds)
+//   );
+//   next();
+// });
 
 export const User = model<IUser, UserModal>('User', userSchema);
