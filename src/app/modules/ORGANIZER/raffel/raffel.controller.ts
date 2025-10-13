@@ -38,6 +38,17 @@ const getRaffleById = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+// Get my raffle 
+const getMyRaffle = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const result = await RaffleService.getMyRaffle(userId);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Raffle fetched successfully',
+    data: result,
+  });
+});
 
 // Update raffle
 const updateRaffle = catchAsync(async (req: Request, res: Response) => {
@@ -66,4 +77,5 @@ export const RaffleController = {
   getRaffleById,
   updateRaffle,
   deleteRaffle,
+  getMyRaffle
 };

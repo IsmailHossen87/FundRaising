@@ -3,17 +3,17 @@ import { Raffle } from './raffel.model';
 import { IRaffle } from './raffel.interface';
 import ApiError from '../../../../errors/ApiError';
 import { JwtPayload } from 'jsonwebtoken';
-
+import mongoose from 'mongoose';
 
 // Create raffle
-const createRaffleToDB = async ( user:JwtPayload,payload: IRaffle) => {
+const createRaffleToDB = async (user: JwtPayload, payload: IRaffle) => {
   const isExist = await Raffle.findOne({ raffleName: payload.raffleName });
   if (isExist) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Raffle name already exists');
   }
-  const userId = user.id 
+  const userId = user.id;
 
-  const result = await Raffle.create({...payload,userId});
+  const result = await Raffle.create({ ...payload, userId });
   return result;
 };
 
@@ -29,6 +29,22 @@ const getRaffleByIdFromDB = async (id: string) => {
   if (!raffle) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Raffle not found');
   }
+  return raffle;
+};
+
+// Get my raffle
+const getMyRaffle = async (id: string) => {
+  if (!mongoose.isValidObjectId(id)) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid user ID format");
+  }
+  const objectId = new mongoose.Types.ObjectId(id);
+
+  const raffle = await Raffle.find({ userId: objectId });
+
+  if (!raffle || raffle.length === 0) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Raffle not found");
+  }
+
   return raffle;
 };
 
@@ -56,4 +72,5 @@ export const RaffleService = {
   getRaffleByIdFromDB,
   updateRaffleInDB,
   deleteRaffleFromDB,
+  getMyRaffle,
 };

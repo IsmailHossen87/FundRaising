@@ -5,7 +5,10 @@ export interface ICause extends Document {
   causeName: string;
   registrationNumber?: string;
   category: "School" | "Club" | "Charity";
+  campaignId?: string;
+  status:"Active"| "Pending" | "Rejected",
   bankDetails: string;
+  date:Date,
   addressLine1: string;
   addressLine2?: string;
   town: string;

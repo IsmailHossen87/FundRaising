@@ -20,10 +20,13 @@ router.post(
 );
 
 // Get all raffles
+router.get('/', auth(USER_ROLES.ADMIN), RaffleController.getAllRaffles);
+
+// Get myRaffle
 router.get(
-  '/',
-  auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
-  RaffleController.getAllRaffles
+  '/myRaffle',
+  auth(USER_ROLES.ORGANIZER),
+  RaffleController.getMyRaffle
 );
 
 // Get single raffle by ID

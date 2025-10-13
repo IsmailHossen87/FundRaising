@@ -37,6 +37,7 @@ const userSchema = new Schema<IUser, UserModal>(
       type: String,
       default: 'https://i.ibb.co/z5YHLV9/profile.png',
     },
+    joinedDate:{type:Date,default:Date.now},
     bio: {
       type: String,
       default: '',
