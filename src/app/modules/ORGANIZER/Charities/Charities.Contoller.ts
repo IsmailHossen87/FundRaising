@@ -1,0 +1,63 @@
+import { Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import { charitiesService } from './Charities.Service';
+
+const createCause = async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  req.body.userId = userId;
+
+  if (req.body.data) {
+    const parsedData = JSON.parse(req.body.data);
+    req.body = { ...parsedData, userId };
+  }
+
+if (req.files && 'image' in req.files && req.files.image[0]) {
+  req.body.coverImage = `${process.env.IMAGE_URL}/image/${req.files.image[0].filename}`;
+}
+
+
+  const data = { ...req.body };
+  console.log('checkImage', data);
+  const result = await charitiesService.createCause(data);
+  res.status(StatusCodes.CREATED).json({
+    success: true,
+    message: 'Cause created successfully',
+    data: result,
+  });
+};
+
+const getAllCauses = async (req: Request, res: Response) => {
+  const result = await charitiesService.getAllCauses();
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'All causes fetched successfully',
+    data: result,
+  });
+};
+
+const getSingleCause = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await charitiesService.getSingleCause(id);
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Cause details fetched successfully',
+    data: result,
+  });
+};
+
+const deleteCause = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await charitiesService.deleteCause(id);
+  res.status(StatusCodes.OK).json({
+    success: true,
+    message: 'Cause deleted successfully',
+    data: result,
+  });
+};
+
+export const charitiesController = {
+  createCause,
+  getAllCauses,
+  getSingleCause,
+  deleteCause,
+};

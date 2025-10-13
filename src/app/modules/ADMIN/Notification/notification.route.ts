@@ -7,27 +7,18 @@ import { NotificationValidation } from './notification.validation';
 
 const router = express.Router();
 
-
 router
   .route('/')
   .post(
-    
-    auth(USER_ROLES.ADMIN),
     // validateRequest(NotificationValidation.createNotificationSchema),
+    auth(USER_ROLES.ADMIN),
     NotificationController.createNotification
   )
-  .get(
-    auth(USER_ROLES.ADMIN),
-    NotificationController.getAllNotifications 
-  )
-
+  .get(auth(USER_ROLES.ADMIN), NotificationController.getAllNotifications);
 
 router
   .route('/:id')
-  .get(
-    auth(USER_ROLES.ADMIN),
-    NotificationController.getNotificationById 
-  )
+  .get(auth(USER_ROLES.ADMIN), NotificationController.getNotificationById)
   .patch(
     auth(USER_ROLES.ADMIN),
     validateRequest(NotificationValidation.updateNotificationSchema),

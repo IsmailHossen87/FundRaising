@@ -7,7 +7,7 @@ import catchAsync from '../../../../shared/catchAsync';
 const createNotification = catchAsync(async (req: Request, res: Response) => {
 
   const userId = req.user.id;
-  req.body.userId = userId;
+  req.body.userId = userId
   const result = await NotificationService.createNotification(req.body);
   sendResponse(res, {
     statusCode: StatusCodes.CREATED,
@@ -29,7 +29,7 @@ const getAllNotifications = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     pagination: {
       ...result.meta,
-    },
+    }, 
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Notifications fetched successfully',
