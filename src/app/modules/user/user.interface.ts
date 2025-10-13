@@ -27,7 +27,7 @@ export type IUser = {
   };
 
   location?: string;
-
+  joinedDate:Date;
   authentication?: {
     isResetPassword: boolean;
     oneTimeCode: number | null;

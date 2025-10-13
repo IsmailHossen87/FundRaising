@@ -12,6 +12,13 @@ const causeSchema = new Schema<ICause>(
       enum: ["School", "Club", "Charity"],
       required: true,
     },
+    campaignId:{type:String,default:""},
+    status: {
+      type: String,
+      enum: ["Active","Pending" , "Rejected"],
+      default:"Pending",
+    },
+    date: { type: Date, default:Date.now },
     bankDetails: { type: String, required: true },
     addressLine1: { type: String, default:"" },
     addressLine2: { type: String,default:""},
