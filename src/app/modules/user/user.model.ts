@@ -42,6 +42,16 @@ const userSchema = new Schema<IUser, UserModal>(
       type: String,
       default: '',
     },
+    stripeAccountInfo: {
+      stripeCustomerId: {
+        type: String,
+        required: false,
+      },
+      loginUrl: {
+        type: String,
+        required: false,
+      },
+    },
     status: {
       type: String,
       enum: ['Active', 'Blocked'],

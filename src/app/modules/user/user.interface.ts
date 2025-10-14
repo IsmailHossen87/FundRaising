@@ -25,7 +25,11 @@ export type IUser = {
     postalCode?: string;
     street?: string;
   };
-
+  // StripeAccountInfo
+  stripeAccountInfo?: {
+    stripeCustomerId?: string; 
+    loginUrl?: string;
+  } | null;
   location?: string;
   joinedDate:Date;
   authentication?: {
