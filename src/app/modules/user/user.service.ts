@@ -9,6 +9,7 @@ import generateOTP from '../../../util/generateOTP';
 import { IUser } from './user.interface';
 import { User } from './user.model';
 import { redisClient } from '../../../config/radisConfig';
+import stripe from '../../config/stripe.config';
 
 const OTP_EXPIRATION = 2 * 60;
 
@@ -33,8 +34,31 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   const createAccountTemplate = emailTemplate.createAccount(values);
   await emailHelper.sendEmail(createAccountTemplate);
 
+  let stripeCustomer;
+  try {
+    stripeCustomer = await stripe.customers.create({
+      email: createUser.email,
+      name: createUser.name,
+    });
+  } catch (error) {
+    throw new ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to create Stripe customer'
+    );
+  }
+
+  await User.findOneAndUpdate(
+    {_id:createUser._id},
+    {
+      $set:{
+        stripeAccountInfo:{stripeCustomerId:stripeCustomer.id}
+      }
+    }
+  )
+
   return createUser;
 };
+
 const getUserProfileFromDB = async (
   user: JwtPayload
 ): Promise<Partial<IUser>> => {
@@ -47,7 +71,6 @@ const getUserProfileFromDB = async (
   return isExistUser;
 };
 const getAllUser = async () => {
-
   const isExistUser = await User.find();
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
@@ -84,5 +107,3 @@ export const UserService = {
   getAllUser,
   updateProfileToDB,
 };
-
-

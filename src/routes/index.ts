@@ -5,6 +5,7 @@ import { RaffleRoutes } from '../app/modules/ORGANIZER/raffel/raffe.route';
 import { NotificationRoutes } from '../app/modules/ADMIN/Notification/notification.route';
 import { ActionRouters } from '../app/modules/ADMIN/UsersAction/actionRoute';
 import { CharitiesRoutes } from '../app/modules/ORGANIZER/Charities/Charities.Route';
+import { PaymentRoute } from '../app/modules/Payment/PaymentRoute';
 const router = express.Router();
 
 const apiRoutes = [
@@ -31,6 +32,10 @@ const apiRoutes = [
   {
     path: '/charities',
     route: CharitiesRoutes,
+  },
+  {
+    path: '/payment',
+    route: PaymentRoute,
   },
 ];
 

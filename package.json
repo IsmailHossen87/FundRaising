@@ -9,7 +9,9 @@
     "lint:fix": "lint . --fix",
     "prettier:check": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
     "prettier:fix": "prettier --write .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "stripe": "stripe listen --forward-to=http://10.10.7.23:5000/api/v1/stripe/webhook",
+    "dev:stripe": "concurrently \"ts-node-dev --respawn --transpile-only src/server.ts\" \"npm run stripe\""
   },
   "keywords": [],
   "author": "",
@@ -34,6 +36,7 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "colors": "^1.4.0",
+    "concurrently": "^9.2.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -47,6 +50,7 @@
     "npm": "^10.8.1",
     "redis": "^5.8.3",
     "socket.io": "^4.7.5",
+    "stripe": "^19.1.0",
     "winston": "^3.13.0",
     "winston-daily-rotate-file": "^5.0.0",
     "zod": "^3.23.8"
