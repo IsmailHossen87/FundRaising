@@ -15,6 +15,6 @@ export interface ICause extends Document {
   country: string;
   email: string;
   phone: string;
-  coverImage?: string;
+  coverImage: string;
   description?: string;
 }

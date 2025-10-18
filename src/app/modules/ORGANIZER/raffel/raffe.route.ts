@@ -7,6 +7,8 @@ import {
 } from './raffel.validation';
 import { USER_ROLES } from '../../../../enums/user';
 import auth from '../../../middlewares/auth';
+import fileUploadHandler from '../../../middlewares/fileUploadHandler';
+import { parseFormDataMiddleware } from '../../../middlewares/ParseFormData';
 
 const router = express.Router();
 const rolesOfAccess = [USER_ROLES.ORGANIZER];
@@ -15,6 +17,8 @@ const rolesOfAccess = [USER_ROLES.ORGANIZER];
 router.post(
   '/',
   auth(...rolesOfAccess),
+  fileUploadHandler(),
+  parseFormDataMiddleware, 
   validateRequest(createRaffleZodSchema),
   RaffleController.createRaffle
 );
