@@ -4,11 +4,19 @@ import catchAsync from '../../../../shared/catchAsync';
 import { RaffleService } from './raffel.server';
 import sendResponse from '../../../../shared/sendResponse';
 
+const createRaffle = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
 
-// Create raffle
-const createRaffle = catchAsync(async (req: Request, res: Response) => { 
-    const user = req.user
-  const result = await RaffleService.createRaffleToDB(user,req.body);
+  // handle image upload
+  if (req.files && 'image' in req.files && req.files.image[0]) {
+    req.body.image = `${process.env.IMAGE_URL}/image/${req.files.image[0].filename}`;
+  }
+
+  // attach user ID
+  req.body.userId = userId;
+
+  const result = await RaffleService.createRaffleToDB(req.body);
+
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.CREATED,
@@ -38,7 +46,7 @@ const getRaffleById = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-// Get my raffle 
+// Get my raffle
 const getMyRaffle = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
   const result = await RaffleService.getMyRaffle(userId);
@@ -77,5 +85,5 @@ export const RaffleController = {
   getRaffleById,
   updateRaffle,
   deleteRaffle,
-  getMyRaffle
+  getMyRaffle,
 };

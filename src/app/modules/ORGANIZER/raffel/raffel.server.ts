@@ -1,19 +1,19 @@
 import { StatusCodes } from 'http-status-codes';
-import { Raffle } from './raffel.model';
-import { IRaffle } from './raffel.interface';
 import ApiError from '../../../../errors/ApiError';
 import { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
+import { IRaffle } from './raffel.interface';
+import Raffle from './raffel.model';
 
 // Create raffle
-const createRaffleToDB = async (user: JwtPayload, payload: IRaffle) => {
+const createRaffleToDB = async ( payload: IRaffle) => {
   const isExist = await Raffle.findOne({ raffleName: payload.raffleName });
   if (isExist) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Raffle name already exists');
   }
-  const userId = user.id;
 
-  const result = await Raffle.create({ ...payload, userId });
+
+  const result = await Raffle.create(payload );
   return result;
 };
 

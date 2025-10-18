@@ -1,9 +1,11 @@
 import { Request, Response } from 'express';
-import { StatusCodes } from 'http-status-codes';
 import Stripe from 'stripe';
 import config from '../../../config';
 import stripe from '../../config/stripe.config';
+import { logger } from '../../../shared/logger';
 import ApiError from '../../../errors/ApiError';
+import { StatusCodes } from 'http-status-codes';
+
  
 const webhookHandler = async (req: Request, res: Response): Promise<void> => {
      console.log('Webhook received');
@@ -15,7 +17,7 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
           res.status(500).send('Webhook secret not configured');
           return;
      }
- 
+
      let event: Stripe.Event;
  
      try {
@@ -25,6 +27,12 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
           res.status(400).send(`Webhook Error: ${err.message}`);
           return;
      }
+
+       // Check if the event is valid
+  if (!event) {
+    logger.error('Invalid event received - event object is null or undefined');
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid event received!');
+  }
  
      console.log('event.type', event.type);
      try {
@@ -49,6 +57,8 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
 };
  
 export default webhookHandler;
+
+
  
 // Function for handling a successful payment
 const handlePaymentSucceeded = async (session: Stripe.Checkout.Session) => {

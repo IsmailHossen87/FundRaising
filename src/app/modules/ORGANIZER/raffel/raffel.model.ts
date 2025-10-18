@@ -1,37 +1,77 @@
-import { Schema, model } from 'mongoose';
-import { IRaffle, RaffleModel } from './raffel.interface';
+import { Schema, model, Types } from 'mongoose';
 
-
-const raffleSchema = new Schema<IRaffle, RaffleModel>(
-  { 
+const raffleSchema = new Schema(
+  {
     userId: {
-        type:Schema.Types.ObjectId,ref:"User",required:true
+      type: Types.ObjectId,
+      required: true,
+      ref: 'User', 
     },
     raffleName: {
       type: String,
       required: true,
-      trim: true,
     },
-    sold: {
+    organizer: {
+      name: {
+        type: String,
+        required: true,
+      },
+      email: {
+        type: String,
+        required: true,
+      },
+      phoneNumber: {
+        type: String,
+        required: true,
+      },
+    },
+    targetAmount: {
       type: Number,
       required: true,
-      default: 0,
     },
-    amount: {
-      type: Number,
+    cause: {
+      type: String,
       required: true,
     },
-    date: {
+    ticketSaleEndDate: {
       type: Date,
-      default:Date.now
+      required: true,
+    },
+    drawDate: {
+      type: Date,
+      required: true,
     },
     status: {
       type: String,
       enum: ['active', 'closed'],
       default: 'active',
     },
+    image: {
+      type: String, 
+      required: true,
+    },
+    raffleDescription: {
+      type: String,
+      required: true,
+    },
+    prizes: {
+      type: String,
+      required: true,
+    },
+    sold: {
+      type: Number,
+      default: 0,
+    },
+    amount: {
+      type: Number,
+      default: 0,
+    },
   },
-  { timestamps: true, versionKey: false }
+  {
+    timestamps: true, versionKey:false
+  }
 );
 
-export const Raffle = model<IRaffle, RaffleModel>('Raffle', raffleSchema);
+const Raffle = model('Raffle', raffleSchema);
+
+export default Raffle;
