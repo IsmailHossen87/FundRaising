@@ -9,7 +9,6 @@ const createCause = async (payload: ICause): Promise<ICause> => {
 
   const lastCause = await Cause.findOne().sort({ createdAt: -1 }).select('campaignId');
 
-
   let newNumber = 1;
   if (lastCause && lastCause.campaignId) {
     const lastNumber = parseInt(lastCause.campaignId.split('-')[1]);

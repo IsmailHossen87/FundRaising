@@ -6,6 +6,7 @@ import { NotificationRoutes } from '../app/modules/ADMIN/Notification/notificati
 import { ActionRouters } from '../app/modules/ADMIN/UsersAction/actionRoute';
 import { CharitiesRoutes } from '../app/modules/ORGANIZER/Charities/Charities.Route';
 import { PaymentRoute } from '../app/modules/Payment/PaymentRoute';
+import { registerCowdfunderRoute } from '../app/modules/ORGANIZER/CownFounder/register.route';
 const router = express.Router();
 
 const apiRoutes = [
@@ -36,6 +37,10 @@ const apiRoutes = [
   {
     path: '/payment',
     route: PaymentRoute,
+  },
+  {
+    path: '/registerCownfunder',
+    route: registerCowdfunderRoute,
   },
 ];
 

@@ -8,7 +8,6 @@ export const createCauseZodSchema = z.object({
     category: z.enum(['School', 'Club', 'Charity'], {
       required_error: 'Category is required',
     }),
-    campaignId: z.string().optional(),
     status: z.enum(['Active', 'Pending', 'Rejected'], {
       required_error: 'Status is required',
     }),
@@ -18,11 +17,16 @@ export const createCauseZodSchema = z.object({
     addressLine2: z.string().optional(),
     town: z.string({ required_error: 'Town is required' }),
     country: z.string({ required_error: 'Country is required' }),
-    email: z
+    charityEmail: z
       .string({ required_error: 'Email is required' })
       .email({ message: 'Invalid email format' }),
-    phone: z.string({ required_error: 'Phone number is required' }),
+    charityPhone: z.string({ required_error: 'Phone number is required' }),
     description: z.string().optional(),
+      contractInfo:z.object({
+        ContractName:z.string({ required_error: 'Contract name is required' }),
+        ContractNumber:z.string({ required_error: 'Phone number is required' }),
+        ContractEmail:z.string({ required_error: ' Contract email is required' }),
+      })
   }),
 });
 
