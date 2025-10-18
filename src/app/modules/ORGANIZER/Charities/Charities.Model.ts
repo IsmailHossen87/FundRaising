@@ -4,7 +4,7 @@ import { ICause } from "./Charities.Interface";
 
 const causeSchema = new Schema<ICause>(
   { 
-    userId:{type:Schema.Types.ObjectId,ref:"User",required:true},
+    cownfounderId:{type:Schema.Types.ObjectId,ref:"Crowdfunder",required:true},
     causeName: { type: String, required: true, trim: true },
     registrationNumber: { type: String },
     category: {
@@ -12,7 +12,6 @@ const causeSchema = new Schema<ICause>(
       enum: ["School", "Club", "Charity"],
       required: true,
     },
-    campaignId:{type:String,default:""},
     status: {
       type: String,
       enum: ["Active","Pending" , "Rejected"],
@@ -24,10 +23,16 @@ const causeSchema = new Schema<ICause>(
     addressLine2: { type: String,default:""},
     town: { type: String, required: true },
     country: { type: String, required: true },
-    email: { type: String, required: true },
-    phone: { type: String, required: true },
+    charityEmail: { type: String, required: true },
+    charityPhone: { type: String, required: true },
     coverImage: { type: String },
     description: { type: String },
+    contractInfo:{
+      ContractName:{type:String ,default:""},
+      ContractEmail:{type:String ,default:""},
+      ContractNumber:{type:String ,default:""}
+    }
+
   },
   { timestamps: true, versionKey: false }
 );
