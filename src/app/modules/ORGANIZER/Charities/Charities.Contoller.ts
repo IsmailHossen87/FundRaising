@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { charitiesService } from './Charities.Service';
 
+// CREATECAUSE
 const createCause = async (req: Request, res: Response) => {
   const userId = req.user.id;
   req.body.userId = userId;
@@ -22,6 +23,20 @@ const createCause = async (req: Request, res: Response) => {
     success: true,
     message: 'Cause created successfully',
     data: result,
+  });
+};
+// FOR CROWFOUNDER
+const createCrowdfunder = async (req: Request, res: Response) => { 
+  const userId = req.user.id;
+  if (req.files && 'image' in req.files && req.files.image[0]) {
+    req.body.image = `${process.env.IMAGE_URL}/image/${req.files.image[0].filename}`;
+  }
+  req.body.userId = userId;
+  const created = await charitiesService.createCowdfounder(req.body);
+  res.status(StatusCodes.CREATED).json({
+    success: true,
+    message: 'Crowdfunder created Successfully',
+    data: created,
   });
 };
 
@@ -56,6 +71,7 @@ const deleteCause = async (req: Request, res: Response) => {
 
 export const charitiesController = {
   createCause,
+  createCrowdfunder,
   getAllCauses,
   getSingleCause,
   deleteCause,

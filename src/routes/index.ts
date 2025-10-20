@@ -6,7 +6,6 @@ import { NotificationRoutes } from '../app/modules/ADMIN/Notification/notificati
 import { ActionRouters } from '../app/modules/ADMIN/UsersAction/actionRoute';
 import { CharitiesRoutes } from '../app/modules/ORGANIZER/Charities/Charities.Route';
 import { PaymentRoute } from '../app/modules/Payment/PaymentRoute';
-import { registerCowdfunderRoute } from '../app/modules/ORGANIZER/CownFounder/register.route';
 import { fundRiaseRouter } from '../app/modules/ORGANIZER/FundRaise/FundRaiseRoute';
 const router = express.Router();
 
@@ -32,7 +31,7 @@ const apiRoutes = [
     route: ActionRouters,
   },
   {
-    path: '/charities',
+    path: '/cause',
     route: CharitiesRoutes,
   },
   {
@@ -40,11 +39,7 @@ const apiRoutes = [
     route: PaymentRoute,
   },
   {
-    path: '/registerCownfunder',
-    route: registerCowdfunderRoute,
-  },
-  {
-    path: '/funding',
+    path: '/fundraise',
     route: fundRiaseRouter,
   },
 ];

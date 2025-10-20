@@ -5,20 +5,33 @@ import { USER_ROLES } from '../../../../enums/user';
 import fileUploadHandler from '../../../middlewares/fileUploadHandler';
 import { parseFormDataMiddleware } from '../../../middlewares/ParseFormData';
 import validateRequest from '../../../middlewares/validateRequest';
-import { createCauseZodSchema } from './Charities.zod.validation';
+import {
+  createCauseZodSchema,
+  createCrowdfunderZodSchema,
+} from './Charities.zod.validation';
 
 const router = express.Router();
 
 router.post(
-  '/',
+  '/charity',
   auth(USER_ROLES.ORGANIZER),
   fileUploadHandler(),
   parseFormDataMiddleware,
   validateRequest(createCauseZodSchema),
   charitiesController.createCause
 );
-
 router.get('/', charitiesController.getAllCauses);
+
+// For cowfounder
+router.post(
+  '/cowdFounder',
+  auth(USER_ROLES.ORGANIZER),
+  fileUploadHandler(),
+  parseFormDataMiddleware,
+  validateRequest(createCrowdfunderZodSchema),
+  charitiesController.createCrowdfunder
+);
+
 router.get('/:id', charitiesController.getSingleCause);
 router.delete('/:id', charitiesController.deleteCause);
 

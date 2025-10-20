@@ -1,40 +1,87 @@
 import { Schema, model } from "mongoose";
 import { ICause } from "./Charities.Interface";
 
-
 const causeSchema = new Schema<ICause>(
-  { 
-    cownfounderId:{type:Schema.Types.ObjectId,ref:"Crowdfunder",required:true},
-    causeName: { type: String, required: true, trim: true },
+  {
+    // Common fields
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    status: {
+      type: String,
+      enum: ["Active", "Pending", "Rejected"],
+      default: "Pending",
+    },
+    coverImage: { type: String },
+    description: { type: String },
+
+    // Crowdfunder fields
+    firstName: { type: String },
+    lastName: { type: String },
+    pageTitle: { type: String },
+    pageSlug: { type: String },
+    type: {
+      type: String,
+      enum: ["cowdFounder", "Charity"],
+      required: true,
+    },
+    email: { type: String },
+    password: { type: String },
+    goalAmount: { type: Number },
+    fundraiserType: {
+      type: String,
+      enum: ["crowdfunder", "personal"],
+    },
+    beneficiaryFor: {
+      type: String,
+      enum: ["self", "family", "friend", "charity", "other"],
+    },
+    referralSource: {
+      type: String,
+      enum: [
+        "google",
+        "facebook",
+        "youtube",
+        "tiktok",
+        "twitter",
+        "friend",
+        "event",
+        "blog",
+        "other",
+      ],
+    },
+    eircode: { type: String },
+    phoneCountryCode: { type: String },
+    phone: { type: String },
+    termsAccepted: { type: Boolean, default: false },
+
+    // Cause fields
+    causeName: { type: String },
     registrationNumber: { type: String },
     category: {
       type: String,
       enum: ["School", "Club", "Charity"],
-      required: true,
     },
-    status: {
-      type: String,
-      enum: ["Active","Pending" , "Rejected"],
-      default:"Pending",
+    bankDetails: { type: String },
+    date: { type: Date, default: Date.now },
+    addressLine1: { type: String },
+    addressLine2: { type: String },
+    campaignId: { type: String },
+    town: { type: String },
+    country: { type: String },
+    charityEmail: { type: String },
+    charityPhone: { type: String },
+    contractInfo: {
+      ContractName: { type: String },
+      ContractNumber: { type: String },
+      ContractEmail: { type: String },
     },
-    date: { type: Date, default:Date.now },
-    bankDetails: { type: String, required: true },
-    addressLine1: { type: String, default:"" },
-    addressLine2: { type: String,default:""},
-    town: { type: String, required: true },
-    country: { type: String, required: true },
-    charityEmail: { type: String, required: true },
-    charityPhone: { type: String, required: true },
-    coverImage: { type: String },
-    description: { type: String },
-    contractInfo:{
-      ContractName:{type:String ,default:""},
-      ContractEmail:{type:String ,default:""},
-      ContractNumber:{type:String ,default:""}
-    }
-
   },
-  { timestamps: true, versionKey: false }
+  {
+    timestamps: true,
+    versionKey: false,
+  }
 );
 
-export const Cause = model<ICause>("Charities", causeSchema);
+
+
+
+export const Charities = model<ICause>("Charities", causeSchema);

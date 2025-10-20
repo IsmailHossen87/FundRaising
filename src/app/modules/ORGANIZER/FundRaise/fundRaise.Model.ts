@@ -3,6 +3,7 @@ import { IfundRaise } from "./fundRaise.interface";
 
 const fundRaiseSchema = new Schema<IfundRaise>({
   charityId: { type: Schema.Types.ObjectId, ref: "Charities" },
+  crownFounderId: { type: Schema.Types.ObjectId, ref: "Crowdfunder" },
   title: { type: String, default: "" },
   type: {
     type: String,
