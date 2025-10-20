@@ -1,7 +1,8 @@
 import { Types } from "mongoose"
 
 export interface IfundRaise {
-  charityId: Types.ObjectId
+  charityId: Types.ObjectId,
+  crownFounderId:Types.ObjectId,
   title: string
   type: "simple" | "event" | "memorial" | "celebration"
   targetAmount: number

@@ -1,13 +1,13 @@
 import { StatusCodes } from 'http-status-codes';
 import { ICause } from './Charities.Interface';
-import { Cause } from './Charities.Model';
+import { Charities } from './Charities.Model';
 import ApiError from '../../../../errors/ApiError';
 import { JwtPayload } from 'jsonwebtoken';
 import { USER_ROLES } from '../../../../enums/user';
 
 const createCause = async (payload: ICause): Promise<ICause> => {
 
-  const lastCause = await Cause.findOne().sort({ createdAt: -1 }).select('campaignId');
+  const lastCause = await Charities.findOne().sort({ createdAt: -1 }).select('campaignId');
 
   let newNumber = 1;
   if (lastCause && lastCause.campaignId) {
@@ -20,7 +20,7 @@ const createCause = async (payload: ICause): Promise<ICause> => {
   const newCampaignId = `#A-${newNumber}`;
   payload.campaignId = newCampaignId; 
 
-  const result = await Cause.create(payload);
+  const result = await Charities.create(payload);
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cause');
   }
@@ -28,16 +28,27 @@ const createCause = async (payload: ICause): Promise<ICause> => {
   return result;
 };
 
+const createCowdfounder = async (payload: ICause): Promise<ICause> => {
+    
+  const result = Charities.create(payload);
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cause');
+  }
+
+  return result;
+};
+
+
 export const causeService = {
   createCause,
 };
 
 const getAllCauses = async (): Promise<ICause[]> => {
-  return await Cause.find().sort({ createdAt: -1 });
+  return await Charities.find().sort({ createdAt: -1 });
 };
 
 const getSingleCause = async (id: string): Promise<ICause | null> => {
-  const cause = await Cause.findById(id);
+  const cause = await Charities.findById(id);
   if (!cause) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Cause not found');
   }
@@ -45,7 +56,7 @@ const getSingleCause = async (id: string): Promise<ICause | null> => {
 };
 
 const deleteCause = async (id: string): Promise<ICause | null> => {
-  const cause = await Cause.findByIdAndDelete(id);
+  const cause = await Charities.findByIdAndDelete(id);
   if (!cause) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Cause not found');
   }
@@ -54,6 +65,7 @@ const deleteCause = async (id: string): Promise<ICause | null> => {
 
 export const charitiesService = {
   createCause,
+  createCowdfounder,
   getAllCauses,
   getSingleCause,
   deleteCause,

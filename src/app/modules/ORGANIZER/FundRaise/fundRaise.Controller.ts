@@ -5,6 +5,7 @@ import { fundRaiseService } from './fundRaise.Service';
 
 const createFundRaise = async (req: Request, res: Response) => {
   const charityId = req.params.id;
+
   if (req.files && 'image' in req.files && req.files.image[0]) {
     req.body.image = `${process.env.IMAGE_URL}/image/${req.files.image[0].filename}`;
   }
