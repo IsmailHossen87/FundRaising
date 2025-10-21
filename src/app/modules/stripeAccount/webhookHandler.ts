@@ -8,7 +8,7 @@ import { StatusCodes } from 'http-status-codes';
 
  
 const webhookHandler = async (req: Request, res: Response): Promise<void> => {
-     console.log('Webhook received');
+
      const sig = req.headers['stripe-signature'];
      const webhookSecret = config.stripe.stripe_webhook_secret;
  

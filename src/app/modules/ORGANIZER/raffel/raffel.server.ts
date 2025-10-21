@@ -6,21 +6,55 @@ import { IRaffle } from './raffel.interface';
 import Raffle from './raffel.model';
 
 // Create raffle
-const createRaffleToDB = async ( payload: IRaffle) => {
+const createRaffleToDB = async (payload: IRaffle) => {
   const isExist = await Raffle.findOne({ raffleName: payload.raffleName });
   if (isExist) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Raffle name already exists');
   }
 
-
-  const result = await Raffle.create(payload );
+  const result = await Raffle.create(payload);
   return result;
 };
 
 // Get all raffles
-const getAllRafflesFromDB = async () => {
-  const raffles = await Raffle.find().sort({ createdAt: -1 });
-  return raffles;
+const getAllRafflesFromDB = async (queryFields: Record<string, any>) => {
+  const { search, page, limit, ...filters } = queryFields;
+  const query = search
+    ? {
+        $or: [
+          { type: { $regex: search, $options: 'i' } },
+          { title: { $regex: search, $options: 'i' } },
+          { recipientGroup: { $regex: search, $options: 'i' } },
+        ],
+        ...filters,
+      }
+    : { ...filters };
+
+  let queryBuilder = Raffle.find(query);
+
+  if (page && limit) {
+    queryBuilder = queryBuilder
+      .skip((Number(page) - 1) * Number(limit))
+      .limit(Number(limit));
+  } else {
+    queryBuilder = queryBuilder.skip(0).limit(10);
+  }
+  queryBuilder = queryBuilder.sort({ createdAt: -1 });
+  const result = await queryBuilder;
+  const totalNotification = await Raffle.countDocuments(query);
+  const totalActive = await Raffle.countDocuments({status:"active"})
+  const totalPages = limit ? Math.ceil(totalNotification / Number(limit)) : 1;
+
+  return {
+    result,
+    meta: {
+      limit: Number(limit) || 10,
+      page: Number(page) || 1,
+      total: totalNotification,
+      active:totalActive,
+      totalPages,
+    },
+  };
 };
 
 // Get single raffle
@@ -35,14 +69,14 @@ const getRaffleByIdFromDB = async (id: string) => {
 // Get my raffle
 const getMyRaffle = async (id: string) => {
   if (!mongoose.isValidObjectId(id)) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid user ID format");
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid user ID format');
   }
   const objectId = new mongoose.Types.ObjectId(id);
 
   const raffle = await Raffle.find({ userId: objectId });
 
   if (!raffle || raffle.length === 0) {
-    throw new ApiError(StatusCodes.NOT_FOUND, "Raffle not found");
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Raffle not found');
   }
 
   return raffle;

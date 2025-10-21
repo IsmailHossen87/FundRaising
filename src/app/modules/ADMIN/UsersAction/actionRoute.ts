@@ -5,6 +5,7 @@ import { actionController } from './actionController';
 
 
 const router = express.Router();
+// get all Cherity
 const admin = [USER_ROLES.ADMIN]
 router
   .route('/')
@@ -12,14 +13,16 @@ router
     auth(...admin),
     actionController.getAllCharitits
   )
-// USER ACTION
+  // all Count
+
+// USER Status Change
 router
   .route('/:id')
   .patch(
     auth(...admin),
     actionController.statusChange
   )
-
+// charity status change
   router
   .route("/cheritist/:id")
   .patch(

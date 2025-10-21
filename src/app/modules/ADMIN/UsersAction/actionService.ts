@@ -5,8 +5,8 @@ import { JwtPayload } from 'jsonwebtoken';
 import { USER_ROLES } from '../../../../enums/user';
 import { Charities } from '../../ORGANIZER/Charities/Charities.Model';
 
+
 const getAllCharitits = async (user: JwtPayload) => {
-  console.log('All Cherity get');
   if (USER_ROLES.ADMIN !== user.role) {
     throw new ApiError(
       StatusCodes.FORBIDDEN,
@@ -18,14 +18,13 @@ const getAllCharitits = async (user: JwtPayload) => {
     select: 'name email',
   });
 
-  console.log(result);
-
   if (!result) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Cheritist not found');
   }
 
   return result;
 };
+
 
 const statusChange = async (authUser: JwtPayload, userId: string) => {
   if (authUser.role !== USER_ROLES.ADMIN) {

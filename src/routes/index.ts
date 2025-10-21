@@ -5,7 +5,6 @@ import { RaffleRoutes } from '../app/modules/ORGANIZER/raffel/raffe.route';
 import { NotificationRoutes } from '../app/modules/ADMIN/Notification/notification.route';
 import { ActionRouters } from '../app/modules/ADMIN/UsersAction/actionRoute';
 import { CharitiesRoutes } from '../app/modules/ORGANIZER/Charities/Charities.Route';
-import { PaymentRoute } from '../app/modules/Payment/PaymentRoute';
 import { fundRiaseRouter } from '../app/modules/user/FundRaise/FundRaiseRoute';
 
 const router = express.Router();
@@ -20,7 +19,7 @@ const apiRoutes = [
     route: AuthRoutes,
   },
   {
-    path: '/raffel',
+    path: '/raffle',
     route: RaffleRoutes,
   },
   {
@@ -34,10 +33,6 @@ const apiRoutes = [
   {
     path: '/cause',
     route: CharitiesRoutes,
-  },
-  {
-    path: '/payment',
-    route: PaymentRoute,
   },
   {
     path: '/fundraise',

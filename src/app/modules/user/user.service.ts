@@ -10,6 +10,8 @@ import { IUser } from './user.interface';
 import { User } from './user.model';
 import { redisClient } from '../../../config/radisConfig';
 import stripe from '../../config/stripe.config';
+import { Charities } from '../ORGANIZER/Charities/Charities.Model';
+import { Funding } from './FundRaise/fundRaise.Model';
 
 const OTP_EXPIRATION = 2 * 60;
 
@@ -79,6 +81,24 @@ const getAllUser = async () => {
   return isExistUser;
 };
 
+// Count
+const allUserCount = async () => {
+  const allUser = await User.countDocuments();
+  const charities = await Charities.countDocuments({type:"Charity"});
+  const fundRaiser = await Funding.countDocuments();
+  const cownFounder = await Charities.countDocuments({type:"cowdFounder"});
+  const donner = await Charities.countDocuments();
+
+
+ return {
+    meta: {
+      allUser:allUser,
+      charities:charities,
+      fundRaiser:fundRaiser,
+      cownFounder:cownFounder
+    },
+  };
+};
 const updateProfileToDB = async (
   user: JwtPayload,
   payload: Partial<IUser>
@@ -103,6 +123,7 @@ const updateProfileToDB = async (
 
 export const UserService = {
   createUserToDB,
+  allUserCount,
   getUserProfileFromDB,
   getAllUser,
   updateProfileToDB,

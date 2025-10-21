@@ -27,7 +27,8 @@ const createRaffle = catchAsync(async (req: Request, res: Response) => {
 
 // Get all raffles
 const getAllRaffles = catchAsync(async (req: Request, res: Response) => {
-  const result = await RaffleService.getAllRafflesFromDB();
+  const { search, page, limit, ...query } = req.query;
+  const result = await RaffleService.getAllRafflesFromDB({search, page, limit, ...query} );
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -40,6 +41,9 @@ const getAllRaffles = catchAsync(async (req: Request, res: Response) => {
 const getRaffleById = catchAsync(async (req: Request, res: Response) => {
   const result = await RaffleService.getRaffleByIdFromDB(req.params.id);
   sendResponse(res, {
+    pagination:{
+      ...result.meta
+    },
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Raffle fetched successfully',

@@ -19,6 +19,7 @@ const getAllCharitits = catchAsync(
     });
   }
 );
+
 //update profile
 const statusChange = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {

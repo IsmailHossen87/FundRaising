@@ -5,7 +5,8 @@ import { StatusCodes } from 'http-status-codes';
 import { createPaymentService } from "./PaymentService";
 
 const createPaymentIntent = catchAsync(async (req: Request, res: Response) => {
-  const result = await createPaymentService.createPaymentIntent(req.user.id);
+  const paramsId = req.params.id
+  const result = await createPaymentService.createPaymentIntent(paramsId,req.user.id);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,

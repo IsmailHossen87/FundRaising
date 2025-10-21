@@ -16,6 +16,7 @@ export type IRaffle = {
   image: string;
   raffleDescription: string;
   prizes: string;
+  creator:Types.ObjectId;
   sold: number;
   amount: number;
 };
