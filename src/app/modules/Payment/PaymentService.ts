@@ -64,9 +64,9 @@ import Raffle from "../ORGANIZER/raffel/raffel.model";
 
 const createPaymentIntent = async ( paramsId:string,userId: string) => { 
 
-  // ✅ শুধু user থেকে customer তৈরি 
   const user = await User.findById(userId);
   const raffle = await Raffle.findById(paramsId) 
+
                                                                                            
 
   if (!raffle) {
@@ -98,7 +98,7 @@ const createPaymentIntent = async ( paramsId:string,userId: string) => {
         price_data: {
           currency: "usd",
           product_data: { name: "Raffle Payment" },
-          unit_amount: raffle.amount , 
+          unit_amount: Number(raffle.amount) * 100 , 
         },
         quantity: 1,
       },
