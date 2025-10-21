@@ -39,8 +39,16 @@ const statusChange = async (authUser: JwtPayload, userId: string) => {
   if (!isExistUser) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
   }
+  const currentStatus = isExistUser.status;
 
-  const newStatus = 'Blocked';
+  let newStatus;
+  if (currentStatus === 'Active') {
+    newStatus = 'Blocked';
+  } else if (currentStatus === 'Blocked') {
+    newStatus = 'Active';
+  }else{
+    newStatus = 'Active'
+  }
 
   const updatedUser = await User.findByIdAndUpdate(
     userId,

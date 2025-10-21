@@ -21,6 +21,7 @@ router.post(
   charitiesController.createCause
 );
 router.get('/', charitiesController.getAllCauses);
+router.get('/myCharity',auth(...USER_ROLES.ADMIN,USER_ROLES.ORGANIZER), charitiesController.getCharitiesByUser);
 
 // For cowfounder
 router.post(

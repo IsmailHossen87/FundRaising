@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import { charitiesService } from './Charities.Service';
+import catchAsync from '../../../../shared/catchAsync';
+import { Charities } from './Charities.Model';
+import sendResponse from '../../../../shared/sendResponse';
 
 // CREATECAUSE
 const createCause = async (req: Request, res: Response) => {
@@ -48,6 +51,18 @@ const getAllCauses = async (req: Request, res: Response) => {
     data: result,
   });
 };
+const getCharitiesByUser = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+
+  const charities = await Charities.find();
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "User charities fetched successfully",
+    data: charities,
+  });
+});
 
 const getSingleCause = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -73,6 +88,7 @@ export const charitiesController = {
   createCause,
   createCrowdfunder,
   getAllCauses,
+  getCharitiesByUser,
   getSingleCause,
   deleteCause,
 };

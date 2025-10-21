@@ -10,9 +10,6 @@ export const createCauseZodSchema = z.object({
     category: z.enum(['School', 'Club', 'Charity'], {
       required_error: 'Category is required',
     }),
-    status: z.enum(['Active', 'Pending', 'Rejected'], {
-      required_error: 'Status is required',
-    }),
     bankDetails: z.string({ required_error: 'Bank details are required' }),
     date: z.coerce.date({ required_error: 'Date is required' }),
     addressLine1: z.string({ required_error: 'Address line 1 is required' }),
@@ -41,7 +38,6 @@ export const updateCauseZodSchema = z.object({
     registrationNumber: z.string().optional(),
     category: z.enum(['School', 'Club', 'Charity']).optional(),
     campaignId: z.string().optional(),
-    status: z.enum(['Active', 'Pending', 'Rejected']).optional(),
     bankDetails: z.string().optional(),
     date: z.coerce.date().optional(),
     addressLine1: z.string().optional(),
@@ -78,7 +74,6 @@ export const createCrowdfunderZodSchema = z.object({
         'other',
       ])
       .optional(),
-    eircode: z.string().optional(),
     phoneCountryCode: z.string().min(1),
     phone: z.string().min(6),
     termsAccepted: z.literal(true),

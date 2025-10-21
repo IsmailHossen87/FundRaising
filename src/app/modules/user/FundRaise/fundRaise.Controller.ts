@@ -18,7 +18,19 @@ const createFundRaise = async (req: Request, res: Response) => {
     data: created,
   });
 };
+const getAllFundRaiser = async (req: Request, res: Response) => {
+
+
+
+  const result = await fundRaiseService.getAllFundRaiser();
+
+  res.status(StatusCodes.CREATED).json({
+    success: true,
+    message: 'All fundraiser Retrived  Successfully',
+    data: result,
+  });
+};
 
 export const fundRaiseController = {
-  createFundRaise,
+  createFundRaise,getAllFundRaiser
 };

@@ -14,8 +14,17 @@ const createFundRaise = async (payload: IfundRaise): Promise<IfundRaise> => {
   return result;
 };
 
+const getAllFundRaiser = async () => {
+  const result = await Funding.find();
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cause');
+  }
+
+  return result;
+};
+
 
 
 export const fundRaiseService ={
-    createFundRaise
+    createFundRaise,getAllFundRaiser
 }
