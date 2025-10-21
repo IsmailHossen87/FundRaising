@@ -10,14 +10,14 @@
 //   if (!isExistEvent) {
 //     throw new ApiError(StatusCodes.BAD_REQUEST, 'Event not found!');
 //   }
-//   const thisCustomer = await User.findById(userId);
+//   const user = await User.findById(userId);
 //   const stripeCustomer = await stripe.customers.create({
-//     name: thisCustomer?.name,
-//     email: thisCustomer?.email,
+//     name: user?.name,
+//     email: user?.email,
 //   });
 
 //   const userUpdate = await User.updateOne(
-//     { _id: thisCustomer?._id },
+//     { _id: user?._id },
 //     { $set: { 'stripeAccountInfo.stripeCustomerId': stripeCustomer.id } }
 //   );
 //   const stripeSessionData: any = {
@@ -60,23 +60,31 @@ import stripe from "../../config/stripe.config";
 import ApiError from "../../../errors/ApiError";
 import { StatusCodes } from "http-status-codes";
 import config from "../../../config";
+import Raffle from "../ORGANIZER/raffel/raffel.model";
 
-const createPaymentIntent = async (userId: string) => {
+const createPaymentIntent = async ( paramsId:string,userId: string) => { 
+
   // ✅ শুধু user থেকে customer তৈরি 
-  const thisCustomer = await User.findById(userId);
-  if (!thisCustomer) {
+  const user = await User.findById(userId);
+  const raffle = await Raffle.findById(paramsId) 
+                                                                                           
+
+  if (!raffle) {
+    throw new ApiError(StatusCodes.NOT_FOUND, "Raffle not found!");
+  }
+  if (!user) {
     throw new ApiError(StatusCodes.NOT_FOUND, "User not found!");
   }
 
   // ✅ Stripe customer তৈরি
   const stripeCustomer = await stripe.customers.create({
-    name: thisCustomer.name,
-    email: thisCustomer.email,
+    name: user.name,
+    email: user.email,
   });
 
   // ✅ User এর stripe info update
   await User.updateOne(
-    { _id: thisCustomer._id },
+    { _id: user._id },
     { $set: { "stripeAccountInfo.stripeCustomerId": stripeCustomer.id } }
   );
 
@@ -89,16 +97,19 @@ const createPaymentIntent = async (userId: string) => {
       {
         price_data: {
           currency: "usd",
-          product_data: { name: "Test Payment" },
-          unit_amount: 1000, 
+          product_data: { name: "Raffle Payment" },
+          unit_amount: raffle.amount , 
         },
         quantity: 1,
       },
     ],
     metadata: {
       user: userId.toString(),
-      purpose: "test-payment",
+      raffleId:raffle._id.toString(),
+      amount:raffle.amount,
+      // creator: raffle.creator.toString(),
     },
+   
     success_url: config.stripe.success_url,
     cancel_url: config.stripe.cancel_url,
   });

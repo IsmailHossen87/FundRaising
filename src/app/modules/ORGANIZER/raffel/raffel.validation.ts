@@ -14,7 +14,7 @@ export const createRaffleZodSchema = z.object({
     targetAmount: z
       .number()
       .min(1, { message: 'Target amount must be greater than 0' }),
-    cause: z.string({ required_error: 'Cause is required' }),
+    causeId: z.string({ required_error: 'Cause is required' }),
     ticketSaleEndDate: z.coerce.date(),
     drawDate: z.coerce.date(),
     status: z.enum(['active', 'closed']).default('active'),
@@ -37,7 +37,7 @@ export const updateRaffleZodSchema = z.object({
       })
       .optional(),
     targetAmount: z.number().min(1).optional(),
-    cause: z.string().optional(),
+    causeId: z.string().optional(),
     ticketSaleEndDate: z.coerce.date().optional(),
     drawDate: z.coerce.date().optional(),
     status: z.enum(['active', 'closed']).optional(),

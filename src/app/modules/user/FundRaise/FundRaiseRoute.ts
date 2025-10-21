@@ -3,12 +3,17 @@ import { fundRaiseController } from './fundRaise.Controller';
 import fileUploadHandler from '../../../middlewares/fileUploadHandler';
 import { parseFormDataMiddleware } from '../../../middlewares/ParseFormData';
 
-const router = Router();
+const router = Router(); 
+router.get(
+  '/',
+  fundRaiseController.getAllFundRaiser
+);
 router.post(
   '/:id',
   fileUploadHandler(),
   parseFormDataMiddleware,
   fundRaiseController.createFundRaise
 );
+
 
 export const fundRiaseRouter = router;

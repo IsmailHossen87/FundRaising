@@ -7,6 +7,7 @@ import { NotificationValidation } from './notification.validation';
 
 const router = express.Router();
 
+//create notification
 router
   .route('/')
   .post(
@@ -15,7 +16,8 @@ router
     NotificationController.createNotification
   )
   .get(auth(USER_ROLES.ADMIN), NotificationController.getAllNotifications);
-
+  
+//single Notification,getNotification,updateNotification
 router
   .route('/:id')
   .get(auth(USER_ROLES.ADMIN), NotificationController.getNotificationById)

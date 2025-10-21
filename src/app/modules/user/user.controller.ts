@@ -43,7 +43,19 @@ const getAllUser = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
+// count
+const allUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    
+    const result = await UserService.allUserCount()
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Get all Information Count successfully',
+      data: result.meta,
+    });
+  }
+);
 //update profile
 const updateProfile = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -65,4 +77,4 @@ const updateProfile = catchAsync(
   }
 );
 
-export const UserController = { createUser, getUserProfile, updateProfile,getAllUser };
+export const UserController = { createUser,allUser, getUserProfile, updateProfile,getAllUser };

@@ -9,15 +9,14 @@ export type IRaffle = {
     phoneNumber: string;
   };
   targetAmount: number;
-  cause: string;
+  causeId: Types.ObjectId;
   ticketSaleEndDate: Date;
   drawDate: Date;
   status: 'active' | 'closed';
-  image: string; 
+  image: string;
   raffleDescription: string;
-  prizes: string; 
-  sold: number; 
-  amount: number; 
+  prizes: string;
+  creator:Types.ObjectId;
+  sold: number;
+  amount: number;
 };
-
-

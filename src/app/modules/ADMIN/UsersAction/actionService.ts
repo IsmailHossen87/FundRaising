@@ -5,8 +5,8 @@ import { JwtPayload } from 'jsonwebtoken';
 import { USER_ROLES } from '../../../../enums/user';
 import { Charities } from '../../ORGANIZER/Charities/Charities.Model';
 
+
 const getAllCharitits = async (user: JwtPayload) => {
-  console.log('All Cherity get');
   if (USER_ROLES.ADMIN !== user.role) {
     throw new ApiError(
       StatusCodes.FORBIDDEN,
@@ -18,14 +18,13 @@ const getAllCharitits = async (user: JwtPayload) => {
     select: 'name email',
   });
 
-  console.log(result);
-
   if (!result) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Cheritist not found');
   }
 
   return result;
 };
+
 
 const statusChange = async (authUser: JwtPayload, userId: string) => {
   if (authUser.role !== USER_ROLES.ADMIN) {
@@ -39,8 +38,16 @@ const statusChange = async (authUser: JwtPayload, userId: string) => {
   if (!isExistUser) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
   }
+  const currentStatus = isExistUser.status;
 
-  const newStatus = 'Blocked';
+  let newStatus;
+  if (currentStatus === 'Active') {
+    newStatus = 'Blocked';
+  } else if (currentStatus === 'Blocked') {
+    newStatus = 'Active';
+  }else{
+    newStatus = 'Active'
+  }
 
   const updatedUser = await User.findByIdAndUpdate(
     userId,

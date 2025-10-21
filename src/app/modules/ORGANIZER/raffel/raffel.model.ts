@@ -29,8 +29,8 @@ const raffleSchema = new Schema(
       type: Number,
       required: true,
     },
-    cause: {
-      type: String,
+    causeId: {
+      type: Schema.Types.ObjectId,ref:"Charities" ,
       required: true,
     },
     ticketSaleEndDate: {
@@ -57,6 +57,11 @@ const raffleSchema = new Schema(
     prizes: {
       type: String,
       required: true,
+    },
+     creator: {
+      type: Types.ObjectId,
+      required: true,
+      ref: 'User', 
     },
     sold: {
       type: Number,

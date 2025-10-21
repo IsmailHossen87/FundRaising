@@ -55,7 +55,7 @@ const userSchema = new Schema<IUser, UserModal>(
     status: {
       type: String,
       enum: ['Active', 'Blocked'],
-      default: 'Blocked',
+      default: 'Active',
     },
     verified: {
       type: Boolean,
