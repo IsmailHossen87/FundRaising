@@ -6,6 +6,7 @@ import { NotificationRoutes } from '../app/modules/ADMIN/Notification/notificati
 import { ActionRouters } from '../app/modules/ADMIN/UsersAction/actionRoute';
 import { CharitiesRoutes } from '../app/modules/ORGANIZER/Charities/Charities.Route';
 import { fundRiaseRouter } from '../app/modules/user/FundRaise/FundRaiseRoute';
+import { PaymentRouter } from '../app/modules/Payment/Payment.route';
 
 const router = express.Router();
 
@@ -37,6 +38,10 @@ const apiRoutes = [
   {
     path: '/fundraise',
     route:fundRiaseRouter ,
+  },
+  {
+    path: '/payment',
+    route:PaymentRouter ,
   },
 ];
 

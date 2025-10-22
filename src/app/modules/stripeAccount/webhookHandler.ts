@@ -5,12 +5,16 @@ import stripe from '../../config/stripe.config';
 import { logger } from '../../../shared/logger';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
+import { handlePayment } from '../../../handlers/handlePaymentSuccess';
+
 
  
 const webhookHandler = async (req: Request, res: Response): Promise<void> => {
-
      const sig = req.headers['stripe-signature'];
-     const webhookSecret = config.stripe.stripe_webhook_secret;
+     const webhookSecret = config.stripe.stripe_webhook_secret; 
+
+     console.log(sig);
+     console.log("WEBSECRET",webhookSecret);
  
      if (!webhookSecret) {
           console.error('Stripe webhook secret not set');
@@ -38,7 +42,7 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
      try {
           switch (event.type) {
                case 'checkout.session.completed':
-                    await handlePaymentSucceeded(event.data.object);
+                    await handlePayment.handleRaffleBuy(event.data.object)
                     break;
                case 'transfer.created':
                     await handleTransferCreated(event.data.object);
@@ -59,29 +63,9 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
 export default webhookHandler;
 
 
+
+
  
-// Function for handling a successful payment
-const handlePaymentSucceeded = async (session: Stripe.Checkout.Session) => {
-     try {
-          const { ...metadata }: any = session.metadata;
- 
-          
-          const paymentIntent = session.payment_intent as string;
-          console.log('=============================');
-          console.log('paymentIntent : 2', paymentIntent);
-          
-          console.log('isPaymentExist : 3');
-          
- 
-          
- 
-          console.log('newPayment : 11');
- 
-          
-     } catch (error) {
-          console.error('Error in handlePaymentSucceeded:', error);
-     }
-};
  
 // handleTransferCreated
 const handleTransferCreated = async (transfer: Stripe.Transfer) => {

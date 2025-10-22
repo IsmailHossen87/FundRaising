@@ -16,4 +16,6 @@ const createPaymentIntent = catchAsync(async (req: Request, res: Response) => {
 });
 
 
-export const PaymentController ={createPaymentIntent}
+
+
+export const PaymentController ={createPaymentIntent }
