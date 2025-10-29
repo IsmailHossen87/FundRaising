@@ -9,6 +9,7 @@ import {
   createCauseZodSchema,
   createCrowdfunderZodSchema,
 } from './Charities.zod.validation';
+import { PaymentController } from '../../Payment/paymentController';
 
 const router = express.Router();
 
@@ -33,6 +34,7 @@ router.post(
   validateRequest(createCrowdfunderZodSchema),
   charitiesController.createCrowdfunder
 );
+router.post("/paymentIntent/:id",PaymentController.createPaymentIntentCause)
 
 router.get('/:id', charitiesController.getSingleCause);
 router.delete('/:id', charitiesController.deleteCause);

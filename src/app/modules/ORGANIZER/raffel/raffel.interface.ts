@@ -16,7 +16,8 @@ export type IRaffle = {
   image: string;
   raffleDescription: string;
   prizes: string;
-  sold: number;
+  targetsold: number;
   amount: number;
+  sold:number,
   ticketBuyers: Types.ObjectId[];
 };

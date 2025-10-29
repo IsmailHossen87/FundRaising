@@ -1,70 +1,69 @@
-import { Schema, model } from "mongoose";
-import { ICause } from "./Charities.Interface";
+import { Schema, model } from 'mongoose';
+import { ICause } from './Charities.Interface';
+import { boolean } from 'zod';
 
 const causeSchema = new Schema<ICause>(
   {
     // Common fields
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    fundRaiser: [{ type: Schema.Types.ObjectId, ref: 'Funding' }],
+    donner: [{ type: Schema.Types.ObjectId, ref: 'Dooner' }],
     status: {
       type: String,
-      enum: ["Active", "Pending", "Rejected"],
-      default: "Pending",
+      enum: ['Active', 'Pending', 'Rejected'],
+      default: 'Pending',
     },
     coverImage: { type: String },
     description: { type: String },
 
-    // Crowdfunder fields
-    firstName: { type: String },
-    lastName: { type: String },
     pageTitle: { type: String },
     pageSlug: { type: String },
     type: {
       type: String,
-      enum: ["cowdFounder", "Charity"],
+      enum: ['cowdFounder', 'Charity'],
       required: true,
     },
-    email: { type: String },
-    password: { type: String },
+
+    Totalcollection: { type: Number, default: 0 },
+
     goalAmount: { type: Number },
     fundraiserType: {
       type: String,
-      enum: ["crowdfunder", "personal"],
+      enum: ['crowdfunder', 'personal'],
     },
     beneficiaryFor: {
       type: String,
-      enum: ["self", "family", "friend", "charity", "other"],
+      enum: ['self', 'family', 'friend', 'charity', 'other'],
     },
     referralSource: {
       type: String,
       enum: [
-        "google",
-        "facebook",
-        "youtube",
-        "tiktok",
-        "twitter",
-        "friend",
-        "event",
-        "blog",
-        "other",
+        'google',
+        'facebook',
+        'youtube',
+        'tiktok',
+        'twitter',
+        'friend',
+        'event',
+        'blog',
+        'other',
       ],
     },
-    eircode: { type: String },
     phoneCountryCode: { type: String },
     phone: { type: String },
-    termsAccepted: { type: Boolean, default: false },
+    termsAccepted: { type: Boolean, default: true },
 
     // Cause fields
     causeName: { type: String },
     registrationNumber: { type: String },
     category: {
       type: String,
-      enum: ["School", "Club", "Charity"],
+      enum: ['School', 'Club', 'Charity'],
     },
     bankDetails: { type: String },
     date: { type: Date, default: Date.now },
     addressLine1: { type: String },
     addressLine2: { type: String },
-    campaignId: { type: String },
     town: { type: String },
     country: { type: String },
     charityEmail: { type: String },
@@ -81,7 +80,4 @@ const causeSchema = new Schema<ICause>(
   }
 );
 
-
-
-
-export const Charities = model<ICause>("Charities", causeSchema);
+export const Charities = model<ICause>('Charities', causeSchema);

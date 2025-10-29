@@ -42,7 +42,7 @@ router.get(
 );
 
 //----------------------   PAYMENNT    ------------------------
-router.post("/paymentIntent/:id", auth(USER_ROLES.ADMIN,USER_ROLES.ORGANIZER,USER_ROLES.USER),PaymentController.createPaymentIntent)
+router.post("/paymentIntent/:id",PaymentController.createPaymentIntentRaffle)
 
 
 

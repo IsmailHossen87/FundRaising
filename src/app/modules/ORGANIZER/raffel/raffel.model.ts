@@ -58,16 +58,15 @@ const raffleSchema = new Schema(
       type: String,
       required: true,
     },
-     creator: {
-      type: Types.ObjectId,
-      required: true,
-      ref: 'User', 
-    },
-    sold: {
+    targetsold: {
       type: Number,
       default: 0,
     },
     amount: {
+      type: Number,
+      default: 0,
+    },
+    sold: {
       type: Number,
       default: 0,
     },
