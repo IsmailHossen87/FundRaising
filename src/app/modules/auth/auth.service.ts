@@ -38,12 +38,12 @@ const loginUserFromDB = async (payload: ILoginData) => {
     );
   }
 
-  if (isExistUser.status === 'delete') {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      'Your account has been deactivated. Contact support for help.'
-    );
-  }
+  // if (isExistUser.status === 'delete') {
+  //   throw new ApiError(
+  //     StatusCodes.BAD_REQUEST,
+  //     'Your account has been deactivated. Contact support for help.'
+  //   );
+  // }
 
   const isMatch = await User.isMatchPassword(password, isExistUser.password);
   if (!isMatch) {

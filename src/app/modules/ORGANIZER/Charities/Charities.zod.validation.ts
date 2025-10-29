@@ -52,11 +52,11 @@ export const updateCauseZodSchema = z.object({
 
 export const createCrowdfunderZodSchema = z.object({
   body: z.object({
-    firstName: z.string().min(1),
-    lastName: z.string().min(1),
+    // firstName: z.string().min(1),
+    // lastName: z.string().min(1),
+    // email: z.string().email(),
+    // password: z.string().min(6),
     pageTitle: z.string().min(3),
-    email: z.string().email(),
-    password: z.string().min(6),
     goalAmount: z.coerce.number().positive(),
     type: z.enum(['Charity', 'cowdFounder']),
     beneficiaryFor: z.enum(['self', 'family', 'friend', 'charity', 'other']),
@@ -76,6 +76,48 @@ export const createCrowdfunderZodSchema = z.object({
       .optional(),
     phoneCountryCode: z.string().min(1),
     phone: z.string().min(6),
-    termsAccepted: z.literal(true),
+    contractInfo: z.object({
+      ContractName: z.string().min(1, 'Contract name is required'),
+      ContractNumber: z.string().min(1, 'Contract number is required'),
+      ContractEmail: z.string().email('Invalid contract email'),
+    }),
+    termsAccepted: z.boolean().optional(),
+  }),
+});
+
+export const updateCrowdfunderZodSchema = z.object({
+  body: z.object({
+    // firstName: z.string().min(1).optional(),
+    // lastName: z.string().min(1).optional(),
+    // email: z.string().email().optional(),
+    // password: z.string().min(6).optional(),
+    pageTitle: z.string().min(3).optional(),
+    goalAmount: z.coerce.number().positive().optional(),
+    type: z.enum(['Charity', 'cowdFounder']).optional(),
+    beneficiaryFor: z
+      .enum(['self', 'family', 'friend', 'charity', 'other'])
+      .optional(),
+    description: z.string().min(20).optional(),
+    referralSource: z
+      .enum([
+        'google',
+        'facebook',
+        'youtube',
+        'tiktok',
+        'twitter',
+        'friend',
+        'event',
+        'blog',
+        'other',
+      ])
+      .optional(),
+    phoneCountryCode: z.string().min(1).optional(),
+      contractInfo: z.object({
+      ContractName: z.string().min(1).optional(),
+      ContractNumber: z.string().optional(),
+      ContractEmail: z.string().optional(),
+    }),
+    phone: z.string().min(6).optional(),
+    termsAccepted: z.boolean().optional(),
   }),
 });

@@ -20,8 +20,7 @@ export const createRaffleZodSchema = z.object({
     status: z.enum(['active', 'closed']).default('active'),
     raffleDescription: z.string().optional(),
     prizes: z.string({ required_error: 'Prizes list is required' }),
-    sold: z.number().min(0, { message: 'Sold must be 0 or higher' }),
-    amount: z.number().min(1, { message: 'Amount must be greater than 0' }),
+    targetsold: z.number().min(0, { message: 'Sold must be 0 or higher' }),
   }),
 });
 
@@ -44,7 +43,7 @@ export const updateRaffleZodSchema = z.object({
     image: z.string().url().optional(),
     raffleDescription: z.string().optional(),
     prizes: z.string().optional(),
-    sold: z.number().min(0).optional(),
+    targetsold: z.number().min(0).optional(),
     amount: z.number().min(1).optional(),
   }),
 });

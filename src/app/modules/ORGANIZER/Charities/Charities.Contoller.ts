@@ -16,10 +16,11 @@ const createCause = async (req: Request, res: Response) => {
   }
 
   if (req.files && 'image' in req.files && req.files.image[0]) {
-    req.body.coverImage = `${process.env.IMAGE_URL}/image/${req.files.image[0].filename}`;
+    req.body.coverImage = `/image/${req.files.image[0].filename}`;
   }
 
-  const data = { ...req.body };
+  const data = { ...req.body }; 
+  console.log(data);
 
   const result = await charitiesService.createCause(data);
   res.status(StatusCodes.CREATED).json({

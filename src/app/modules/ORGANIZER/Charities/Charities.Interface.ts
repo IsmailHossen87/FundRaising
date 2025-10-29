@@ -1,52 +1,56 @@
-import { Document, Types } from "mongoose";
+import { Document, Types } from 'mongoose';
 
-export type FundraiserType = "crowdfunder" | "personal";
-export type BeneficiaryFor = "self" | "family" | "friend" | "charity" | "other";
+export type FundraiserType = 'crowdfunder' | 'personal';
+export type BeneficiaryFor = 'self' | 'family' | 'friend' | 'charity' | 'other';
 export type ReferralSource =
-  | "google"
-  | "facebook"
-  | "youtube"
-  | "tiktok"
-  | "twitter"
-  | "friend"
-  | "event"
-  | "blog"
-  | "other";
-export type CampaignStatus = "Active" | "Pending" | "Rejected";
+  | 'google'
+  | 'facebook'
+  | 'youtube'
+  | 'tiktok'
+  | 'twitter'
+  | 'friend'
+  | 'event'
+  | 'blog'
+  | 'other';
+export type CampaignStatus = 'Active' | 'Pending' | 'Rejected';
 
 export interface ICause extends Document {
   // Common
   userId: Types.ObjectId;
+  donner: Types.ObjectId[];
+  fundRaiser: Types.ObjectId[];
   status: CampaignStatus;
   coverImage?: string;
   description?: string;
 
   // Crowdfunder fields
-  firstName?: string;
-  lastName?: string;
+  // firstName?: string;
+  // lastName?: string;
+  // email?: string;
+  // password?: string;
+
   pageTitle?: string;
   pageSlug?: string;
-  type:"cowdFounder" | "Charity",
-  email?: string;
-  password?: string;
+  type: 'cowdFounder' | 'Charity';
   goalAmount?: number;
   fundraiserType?: FundraiserType;
   beneficiaryFor?: BeneficiaryFor;
   referralSource?: ReferralSource;
-  eircode?: string;
   phoneCountryCode?: string;
   phone?: string;
   termsAccepted?: boolean;
+  Totalcollection?: number;
+
+  role: 'ORGANIZER';
 
   // Cause fields
   causeName?: string;
   registrationNumber?: string;
-  category?: "School" | "Club" | "Charity";
+  category?: 'School' | 'Club' | 'Charity';
   bankDetails?: string;
   date?: Date;
   addressLine1?: string;
   addressLine2?: string;
-  campaignId?: string;
   town?: string;
   country?: string;
   charityEmail?: string;
