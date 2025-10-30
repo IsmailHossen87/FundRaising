@@ -23,40 +23,49 @@ export const paymentCancel = (req: Request, res: Response) => {
 };
 // RAFFLE
 const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
-  const { raffleId, purchaseId, ticketCount, totalAmount }: any =
-    session.metadata;
-
   try {
+    const { raffleId, purchaseId, ticketCount, totalAmount }: any =
+      session.metadata;
+
+    const ticket = Number(ticketCount);
+    const TotalAmount = Number(totalAmount);
+
     const updatedPurchase = await RafflePurchase.findByIdAndUpdate(
       purchaseId,
       {
         paymentStatus: 'completed',
         paymentIntentId: session.payment_intent,
+        ticket,
       },
       { new: true }
     );
 
     if (!updatedPurchase) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Organizer not Available');
+      console.warn('❌ Purchase not found, skipping update', { purchaseId });
+      return;
     }
 
     const updatedRaffle = await Raffle.findByIdAndUpdate(
       raffleId,
       {
-        $inc: { sold: Number(ticketCount) },
-        $push: { ticketBuyers: updatedPurchase._id, amount: totalAmount },
+        $inc: { sold: ticket, amount: TotalAmount },
+        $push: { ticketBuyers: updatedPurchase._id },
       },
       { new: true }
     );
-
-    console.log('✅ Payment successful and data updated:', {
-      purchaseId: updatedPurchase._id,
-      raffleSold: updatedRaffle?.sold,
+const taka = TotalAmount.toString()
+    const value = {
+      name: updatedPurchase.firstName,
       email: updatedPurchase.email,
-    });
+      totalTicket: ticketCount,
+      TotalTaka: taka,
+    }; 
+    console.log("VALUE",value);
 
-    // TODO: Send confirmation email to buyer
-    // await sendConfirmationEmail(updatedPurchase.email, updatedPurchase);
+    
+    const CongratulationEmail = emailTemplate.raffleConfirmation(value);
+    await emailHelper.sendEmail(CongratulationEmail);
+
   } catch (error) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Organizer not Available');
   }
@@ -95,9 +104,8 @@ const handleDonate = async (session: Stripe.Checkout.Session) => {
       causeName: charity.causeName,
       causeImage: charity.coverImage,
     };
-    const CongratulationEmail = emailTemplate.donationConfirmation(values)
-    await emailHelper.sendEmail(CongratulationEmail)
-
+    const CongratulationEmail = emailTemplate.donationConfirmation(values);
+    await emailHelper.sendEmail(CongratulationEmail);
   } catch (error) {
     console.error(error);
   }
