@@ -6,8 +6,7 @@ import config from '../../../config';
 import Raffle from '../ORGANIZER/raffel/raffel.model';
 import { Charities } from '../ORGANIZER/Charities/Charities.Model';
 import { Dooner } from '../ORGANIZER/Charities/Donner.model';
-import mongoose from 'mongoose';
-import Stripe from 'stripe';
+import mongoose, { Types } from 'mongoose';
 
 const createPaymentIntent = async (
   raffleId: string,
@@ -20,7 +19,6 @@ const createPaymentIntent = async (
   }
 ) => {
   const raffle = await Raffle.findById(raffleId);
-
   if (!raffle) {
     throw new ApiError(StatusCodes.NOT_FOUND, 'Raffle not found!');
   }
@@ -33,18 +31,35 @@ const createPaymentIntent = async (
     );
   }
 
-  const totalAmount = Number(raffle.amount) * ticketCount;
+  const totalAmount = Number(raffle.targetAmount) * Number(ticketCount);
 
-  const purchase = await RafflePurchase.create({
-    raffleId,
-    firstName: userData.firstName,
-    surName: userData.surName,
-    email: userData.email,
-    message: userData.message || '',
-    ticket: ticketCount,
-    totalAmount,
-    paymentStatus: 'pending',
-  });
+  let buyer = await RafflePurchase.findOne({ email: userData.email });
+
+  if (!buyer) {
+    buyer = await RafflePurchase.create({
+      raffleId: [new Types.ObjectId(raffleId)],
+      firstName: userData.firstName,
+      surName: userData.surName,
+      email: userData.email,
+      message: userData.message || '',
+      ticket: ticketCount,
+      totalAmount,
+      paymentStatus: 'pending',
+    });
+  } else {
+    if (!Array.isArray(buyer.raffleId)) {
+      buyer.raffleId = [buyer.raffleId];
+    }
+    const raffleObjId = new Types.ObjectId(raffleId);
+    if (!buyer.raffleId.some(id => id.equals(raffleObjId))) {
+      buyer.raffleId.push(raffleObjId);
+    }
+    buyer.ticket += ticketCount;
+    buyer.totalAmount += totalAmount;
+    if (userData.message) buyer.message = userData.message;
+
+    await buyer.save();
+  }
 
   const stripeCustomer = await stripe.customers.create({
     name: `${userData.firstName} ${userData.surName}`,
@@ -63,33 +78,32 @@ const createPaymentIntent = async (
             name: `Raffle Tickets - ${raffle.raffleName}`,
             description: `${ticketCount} ticket(s) @ $${raffle.amount} each`,
           },
-          unit_amount: Number(raffle.amount) * 100,
+          unit_amount: Number(totalAmount) * 100,
         },
-        quantity: ticketCount,
+        quantity: 1,
       },
     ],
     metadata: {
-      purchaseId: purchase._id.toString(),
+      purchaseId: buyer._id.toString(),
       raffleId: raffle._id.toString(),
       ticketCount: String(ticketCount),
       totalAmount: String(totalAmount),
     },
     success_url: `${config.stripe.success_url}?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${config.stripe.cancel_url}?purchase_id=${purchase._id}`,
+    cancel_url: `${config.stripe.cancel_url}?purchase_id=${buyer._id}`,
   });
 
-  // 🔥 STEP 3: Purchase এ session ID save করুন
-  await RafflePurchase.findByIdAndUpdate(purchase._id, {
-    stripeSessionId: stripeSession.id,
-  });
+  buyer.stripeSessionId = stripeSession.id;
+  await buyer.save();
 
   return {
     url: stripeSession.url,
     sessionId: stripeSession.id,
-    purchaseId: purchase._id,
+    purchaseId: buyer._id,
   };
 };
 
+// Charity
 const createPaymentIntentCarity = async (
   causeId: string,
   amount: string,
@@ -118,7 +132,7 @@ const createPaymentIntentCarity = async (
       firstName: userData.firstName,
       surName: userData.surName,
       message: userData.message || '',
-      totalAmount: "",
+      totalAmount: '',
       paymentStatus: 'pending',
       causeId: new mongoose.Types.ObjectId(causeId),
     });

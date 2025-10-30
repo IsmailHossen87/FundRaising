@@ -1,12 +1,13 @@
 import { Schema, model } from "mongoose";
+import { boolean } from "zod";
 
 const rafflePurchaseSchema = new Schema(
   {
-    raffleId: {
+    raffleId: [{
       type: Schema.Types.ObjectId,
       ref: "Raffle",
       required: true,
-    },
+    }],
     firstName: {
       type: String,
       required: true,
@@ -19,6 +20,7 @@ const rafflePurchaseSchema = new Schema(
       type: String,
       required: true,
     },
+    verified:{type:Boolean,default:false},
     message: String,
     ticket: {
       type: Number,

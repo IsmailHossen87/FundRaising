@@ -44,7 +44,6 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
         const session = event.data.object as any;
 
         const metadata = session.metadata || {};
-        console.log("-----------------meta----------data-----------",metadata);
 
         
         if (metadata.purchaseId && metadata.raffleId) {
