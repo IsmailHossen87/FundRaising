@@ -45,12 +45,11 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
 
         const metadata = session.metadata || {};
 
-        
-        if (metadata.purchaseId && metadata.raffleId) {
-          // 🎟️ Raffle Payment
+        //  Raffle Payment
+        if ((metadata.type === 'raffle')) {
           await handlePayment.handleRaffleBuy(session);
-        } else if (metadata.doonerId && metadata.causeId) {
-          // 💝 Charity Donation
+          //  Charity Donation
+        } else if ((metadata.type === 'charity')) {
           await handlePayment.handleDonate(session);
         } else {
           console.log('⚠️ Unknown payment type received in webhook');

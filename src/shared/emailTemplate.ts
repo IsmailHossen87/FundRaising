@@ -68,26 +68,41 @@ const donationConfirmation = (values: {
 };
 
 
-const raffleConfirmation = (values:any) => {
+const raffleConfirmation = (values: any) => {
+  const ticketCodesHtml = values.ticketCodes
+    ? `<p style="color: #555; font-size: 16px; line-height: 1.5;">
+        Your Ticket Codes: <strong>${values.ticketCodes.join(', ')}</strong>
+      </p>`
+    : '';
+
   const data = {
     to: values.email,
     subject: 'Raffle Purchase Confirmation',
     html: `
-      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 50px; padding: 20px; color: #555;">
-        <div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-            <h2 style="color: #277E16; font-size: 24px; margin-bottom: 20px;">Hello ${values.name}, Your Raffle Purchase is Confirmed!</h2>
-            <div style="text-align: center;">
-                <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
-                  You have successfully purchased <strong>${values.totalTicket}</strong> raffle ticket(s).
-                </p>
-                <p style="color: #555; font-size: 16px; line-height: 1.5;">Total Amount: <strong>${values.TotalTaka} BDT</strong></p>
-                <p style="color: #555; font-size: 16px; line-height: 1.5;">Good luck! Keep an eye on your email for raffle results.</p>
-            </div>
+      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 0;">
+        <div style="width: 100%; max-width: 600px; margin: 50px auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+          <h2 style="color: #277E16; font-size: 24px; margin-bottom: 20px;">Hello ${values.name}, Your Raffle Purchase is Confirmed!</h2>
+          <div style="text-align: center;">
+            <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
+              You have successfully purchased <strong>${values.totalTicket}</strong> raffle ticket(s).
+            </p>
+            <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
+              Total Amount: <strong>${values.TotalTaka} BDT</strong>
+            </p>
+            ${ticketCodesHtml}
+            <p style="color: #555; font-size: 16px; line-height: 1.5; margin-top: 20px;">
+              Good luck! Keep an eye on your email for raffle results.
+            </p>
+          </div>
         </div>
-      </body>`,
+      </body>
+    `,
   };
+
   return data;
 };
+
+export default raffleConfirmation;
 
 export const emailTemplate = {
   createAccount,

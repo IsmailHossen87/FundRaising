@@ -2,15 +2,17 @@ import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { createPaymentService } from "./PaymentService";
+import { createPaymentIntentUnified } from "./PaymentService";
 
+// Raffle
 const createPaymentIntentRaffle = catchAsync(async (req: Request, res: Response) => {
   const raffleId = req.params.id;
   const { ticket, firstName, surName, email, message } = req.body;
 
-  const paymentSession = await createPaymentService.createPaymentIntent(
-    raffleId,
-    ticket,
+   const paymentSession = await createPaymentIntentUnified(
+    "raffle",         
+    raffleId,         
+    ticket,        
     { firstName, surName, email, message }
   );
 
@@ -27,10 +29,11 @@ const createPaymentIntentCause = catchAsync(async (req: Request, res: Response) 
   const causeId = req.params.id;
   const { totalAmount, firstName,email, surName, message } = req.body;
 
-  const paymentSession = await createPaymentService.createPaymentIntentCarity(
-    causeId,
-    totalAmount,
-    { firstName, surName,email,message }
+ const paymentSession = await createPaymentIntentUnified(
+    "charity",      
+    causeId,        
+    totalAmount,    
+    { firstName, surName, email, message }
   );
 
   sendResponse(res, {
