@@ -2,6 +2,7 @@ import { RafflePurchase } from './../app/modules/ORGANIZER/raffel/RafflePurchase
 import { Request, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import Stripe from 'stripe';
+import crypto from 'crypto';
 import Raffle, {
   Allticket,
 } from '../app/modules/ORGANIZER/raffel/raffel.model';
@@ -24,6 +25,14 @@ export const paymentCancel = (req: Request, res: Response) => {
     message: 'Payment completed successfully',
   });
 };
+
+// GENERATE ticket COde
+const generateTicketCode = (userId: string, raffleId: string): string => {
+  const base = userId + raffleId + Math.random().toString();
+  const hash = crypto.createHash('sha256').update(base).digest('hex');
+  return hash.substring(0, 6).toUpperCase();
+};
+
 // RAFFLE
 const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
   try {
@@ -65,14 +74,18 @@ const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
     }
 
     // 🎟️ Generate tickets
-    const generatedTickets = Array.from({ length: ticket }, () => uuidv4());
-
+    const generatedTickets = Array.from({ length: ticket }, () =>
+      generateTicketCode(
+        updatedPurchase._id.toString(),
+        updatedRaffle._id.toString()
+      )
+    );
     // 🎫 Create multiple ticket entries
     const ticketsToInsert = generatedTickets.map(code => ({
       userId: purchaseId,
       raffleId: raffleId,
       uniqueCode: code,
-      drawDate:updatedRaffle.drawDate
+      drawDate: updatedRaffle.drawDate,
     }));
 
     await Allticket.insertMany(ticketsToInsert);
@@ -84,6 +97,7 @@ const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
       email: updatedPurchase.email,
       totalTicket: ticketCount,
       TotalTaka: taka,
+       ticketCodes: generatedTickets,
     };
 
     const CongratulationEmail = emailTemplate.raffleConfirmation(value);
