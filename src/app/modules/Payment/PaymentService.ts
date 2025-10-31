@@ -129,7 +129,7 @@ import { Charities } from '../ORGANIZER/Charities/Charities.Model';
 //   createPaymentIntentCarity,
 // };
 
-
+// payment
 interface UserData {
   firstName: string;
   surName: string;
