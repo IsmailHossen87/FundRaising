@@ -79,4 +79,29 @@ const raffleSchema = new Schema(
 
 const Raffle = model('Raffle', raffleSchema);
 
+
+
+
+const AllTicket = new Schema(
+  {
+    userId: {
+      type: Types.ObjectId,
+      ref: "RafflePurchase",
+      required: true,
+    },
+    raffleId: {
+      type: Types.ObjectId,
+      ref: "Raffle",
+      required: true,
+    },
+    uniqueCode: {
+      type: String},
+    drawDate: {
+      type: Date},
+  },
+  { timestamps: true }
+);
+
+export const Allticket = model("Allticket", AllTicket);
+
 export default Raffle;

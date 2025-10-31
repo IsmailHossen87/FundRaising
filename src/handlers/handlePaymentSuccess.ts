@@ -1,7 +1,10 @@
 import { RafflePurchase } from './../app/modules/ORGANIZER/raffel/RafflePurchase/purchase.model';
 import { Request, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import Stripe from 'stripe';
-import Raffle from '../app/modules/ORGANIZER/raffel/raffel.model';
+import Raffle, {
+  Allticket,
+} from '../app/modules/ORGANIZER/raffel/raffel.model';
 import ApiError from '../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
 import { Dooner } from '../app/modules/ORGANIZER/Charities/Donner.model';
@@ -30,6 +33,7 @@ const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
     const ticket = Number(ticketCount);
     const TotalAmount = Number(totalAmount);
 
+    // 🛒 Update purchase
     const updatedPurchase = await RafflePurchase.findByIdAndUpdate(
       purchaseId,
       {
@@ -45,32 +49,54 @@ const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
       return;
     }
 
+    // 🎯 Update raffle info
     const updatedRaffle = await Raffle.findByIdAndUpdate(
       raffleId,
       {
         $inc: { sold: ticket, amount: TotalAmount },
-        $push: { ticketBuyers: updatedPurchase._id },
+        $addToSet: { ticketBuyers: updatedPurchase._id },
       },
       { new: true }
     );
-const taka = TotalAmount.toString()
+
+    if (!updatedRaffle) {
+      console.warn('❌ Raffle not found, skipping update', { raffleId });
+      return;
+    }
+
+    // 🎟️ Generate tickets
+    const generatedTickets = Array.from({ length: ticket }, () => uuidv4());
+
+    // 🎫 Create multiple ticket entries
+    const ticketsToInsert = generatedTickets.map(code => ({
+      userId: purchaseId,
+      raffleId: raffleId,
+      uniqueCode: code,
+      drawDate:updatedRaffle.drawDate
+    }));
+
+    await Allticket.insertMany(ticketsToInsert);
+
+    // ✉️ Send confirmation email
+    const taka = TotalAmount.toString();
     const value = {
       name: updatedPurchase.firstName,
       email: updatedPurchase.email,
       totalTicket: ticketCount,
       TotalTaka: taka,
-    }; 
-    console.log("VALUE",value);
+    };
 
-    
     const CongratulationEmail = emailTemplate.raffleConfirmation(value);
     await emailHelper.sendEmail(CongratulationEmail);
 
+    console.log('✅ Raffle purchase completed successfully!');
   } catch (error) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Organizer not Available');
+    console.error('❌ Error in handleRaffleBuy:', error);
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Raffle purchase failed');
   }
 };
 
+// DONATE
 const handleDonate = async (session: Stripe.Checkout.Session) => {
   const { causeId, doonerId, totalAmount }: any = session.metadata;
 
