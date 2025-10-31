@@ -88,7 +88,6 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
   if (storedOTP !== String(oneTimeCode)) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Wrong OTP');
   }
-
   // OTP valid, delete from Redis
   await redisClient.del(redisKeyUsed);
 
