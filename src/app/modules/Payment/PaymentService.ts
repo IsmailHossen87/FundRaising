@@ -54,8 +54,8 @@ const createPaymentIntent = async (
     if (!buyer.raffleId.some(id => id.equals(raffleObjId))) {
       buyer.raffleId.push(raffleObjId);
     }
-    buyer.ticket += ticketCount;
-    buyer.totalAmount += totalAmount;
+    buyer.ticket = ticketCount;
+    buyer.totalAmount = totalAmount;
     if (userData.message) buyer.message = userData.message;
 
     await buyer.save();

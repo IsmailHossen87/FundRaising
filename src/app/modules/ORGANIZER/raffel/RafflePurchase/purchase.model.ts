@@ -1,13 +1,15 @@
-import { Schema, model } from "mongoose";
-import { boolean } from "zod";
+import { Schema, model } from 'mongoose';
+import { boolean } from 'zod';
 
 const rafflePurchaseSchema = new Schema(
   {
-    raffleId: [{
-      type: Schema.Types.ObjectId,
-      ref: "Raffle",
-      required: true,
-    }],
+    raffleId: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Raffle',
+        required: true,
+      },
+    ],
     firstName: {
       type: String,
       required: true,
@@ -20,13 +22,13 @@ const rafflePurchaseSchema = new Schema(
       type: String,
       required: true,
     },
-    verified:{type:Boolean,default:false},
+    verified: { type: Boolean, default: false },
     message: String,
     ticket: {
       type: Number,
       required: true,
     },
-    totalAmount: {type:Number,default:0},
+    totalAmount: { type: Number, default: 0 },
     paymentStatus: {
       type: String,
       enum: ['pending', 'completed', 'failed'],
@@ -38,4 +40,4 @@ const rafflePurchaseSchema = new Schema(
   { timestamps: true, versionKey: false }
 );
 
-export const RafflePurchase = model("RafflePurchase", rafflePurchaseSchema);
+export const RafflePurchase = model('RafflePurchase', rafflePurchaseSchema);
