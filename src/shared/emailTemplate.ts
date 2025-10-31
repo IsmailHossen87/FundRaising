@@ -68,22 +68,23 @@ const donationConfirmation = (values: {
 };
 
 
-const raffleConfirmation = (values: {name:string,email:string,totalTicket:any,TotalTaka:any}) => {
+const raffleConfirmation = (values:any) => {
   const data = {
     to: values.email,
     subject: 'Raffle Purchase Confirmation',
-    html: `<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 50px; padding: 20px; color: #555;">
-      <div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-          <img src="https://ibb.co.com/HDN60nqv" alt="FundRaise Logo" style="display: block; margin: 0 auto 20px; width:150px" />
-          <h2 style="color: #277E16; font-size: 24px; margin-bottom: 20px;">Hello ${values.name}, Your Raffle Purchase is Confirmed!</h2>
-          <div style="text-align: center;">
-              <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">You have successfully purchased <strong>${values.totalTicket}</strong> raffle ticket(s) for <strong>${values.raffleName}</strong>.</p>
-              <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">Your raffle numbers: <strong>${values.raffleNumbers.join(', ')}</strong></p>
-              <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">Good luck! Keep an eye on your email for raffle results.</p>
-          </div>
-          <p style="color: #555; font-size: 14px; line-height: 1.5;">If you did not make this purchase, please contact our support immediately.</p>
-      </div>
-    </body>`,
+    html: `
+      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 50px; padding: 20px; color: #555;">
+        <div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            <h2 style="color: #277E16; font-size: 24px; margin-bottom: 20px;">Hello ${values.name}, Your Raffle Purchase is Confirmed!</h2>
+            <div style="text-align: center;">
+                <p style="color: #555; font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
+                  You have successfully purchased <strong>${values.totalTicket}</strong> raffle ticket(s).
+                </p>
+                <p style="color: #555; font-size: 16px; line-height: 1.5;">Total Amount: <strong>${values.TotalTaka} BDT</strong></p>
+                <p style="color: #555; font-size: 16px; line-height: 1.5;">Good luck! Keep an eye on your email for raffle results.</p>
+            </div>
+        </div>
+      </body>`,
   };
   return data;
 };
