@@ -8,7 +8,8 @@ import sendResponse from '../../../../shared/sendResponse';
 // CREATECAUSE
 const createCause = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  req.body.userId = userId;
+  req.body.userId = userId; 
+  console.log(req.body);
 
   if (req.body.data) {
     const parsedData = JSON.parse(req.body.data);

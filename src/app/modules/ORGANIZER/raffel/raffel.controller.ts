@@ -3,6 +3,8 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../../shared/catchAsync';
 import { RaffleService } from './raffel.server';
 import sendResponse from '../../../../shared/sendResponse';
+import { RafflePurchase } from './RafflePurchase/purchase.model';
+import ApiError from '../../../../errors/ApiError';
 
 const createRaffle = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
@@ -41,9 +43,9 @@ const getAllRaffles = catchAsync(async (req: Request, res: Response) => {
 const getRaffleById = catchAsync(async (req: Request, res: Response) => {
   const result = await RaffleService.getRaffleByIdFromDB(req.params.id);
   sendResponse(res, {
-    pagination:{
-      ...result.meta
-    },
+    // pagination:{
+    //   ...result.meta
+    // },
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Raffle fetched successfully',
@@ -82,6 +84,43 @@ const deleteRaffle = catchAsync(async (req: Request, res: Response) => {
     message: 'Raffle deleted successfully',
   });
 });
+// Delete raffle
+const allParticipant = catchAsync(async (req: Request, res: Response) => {
+  const result = await RaffleService.allParticipant();
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'All User retrived successfully',
+    data:result
+  });
+});
+
+// ®️Randon Winner
+const getRandomWinner = catchAsync(async (req: Request, res: Response) => {
+  const  raffleId= req.params.id
+  const winner = await RaffleService.getRandomWinner(raffleId,1);
+
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Random winner selected successfully',
+    data: winner,
+  });
+});
+const getRandomWinnerMultiple = catchAsync(async (req: Request, res: Response) => {
+  const  raffleId= req.params.id
+  const winner = await RaffleService.getRandomWinner(raffleId,3);
+
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Random winner selected successfully',
+    data: winner,
+  });
+});
 
 export const RaffleController = {
   createRaffle,
@@ -90,4 +129,7 @@ export const RaffleController = {
   updateRaffle,
   deleteRaffle,
   getMyRaffle,
+  allParticipant,
+  getRandomWinner,
+  getRandomWinnerMultiple
 };

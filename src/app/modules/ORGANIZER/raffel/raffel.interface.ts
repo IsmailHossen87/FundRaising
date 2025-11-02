@@ -12,7 +12,7 @@ export type IRaffle = {
   causeId: Types.ObjectId;
   ticketSaleEndDate: Date;
   drawDate: Date;
-  status: 'active' | 'closed';
+  status: 'active' | 'suspended';
   image: string;
   raffleDescription: string;
   prizes: string;

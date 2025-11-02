@@ -53,5 +53,35 @@ const charitistStatus = catchAsync(
   }
 );
 
+// SHOW ALL CHARITY BY raffle
+const allUserUnderCharity = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+    const result = await actionService.allUserUnderCharity(user)
 
-export const actionController ={statusChange,getAllCharitits,charitistStatus}
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'All Raffle retrived successfully',
+      data: result,
+    });
+  }
+);
+//Raffle Status Change
+const RaffleStatusChange = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const raffleId = req.params.id  
+    const user = req.user
+    const result = await actionService.RaffleStatusChange(user,raffleId)
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Raffle Status Change successfully',
+      data: result,
+    });
+  }
+);
+
+
+export const actionController ={statusChange,getAllCharitits,charitistStatus,allUserUnderCharity,RaffleStatusChange}

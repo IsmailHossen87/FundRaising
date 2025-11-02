@@ -2,11 +2,17 @@ import { StatusCodes } from 'http-status-codes';
 import { ICause } from './Charities.Interface';
 import { Charities } from './Charities.Model';
 import ApiError from '../../../../errors/ApiError';
+import { User } from '../../user/user.model';
 
 const createCause = async (payload: ICause): Promise<ICause> => {
   const result = await Charities.create(payload);
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cause');
+  }
+  if(payload.userId){
+    await User.findByIdAndUpdate(payload.userId,{
+      role:"ORGANIZER"
+    })
   }
 
   return result;
@@ -17,6 +23,12 @@ const createCowdfounder = async (payload: ICause): Promise<ICause> => {
 
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cause');
+  }
+
+  if (payload?.userId) {
+    await User.findByIdAndUpdate(payload.userId, {
+      role: 'ORGANIZER',
+    });
   }
 
   return result;

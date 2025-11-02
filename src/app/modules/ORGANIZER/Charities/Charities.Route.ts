@@ -16,19 +16,20 @@ const router = express.Router();
 //create charity or causes
 router.post(
   '/charity',
-  auth(USER_ROLES.ORGANIZER),
+  auth(USER_ROLES.ORGANIZER ,USER_ROLES.USER),
   fileUploadHandler(),
   parseFormDataMiddleware,
   validateRequest(createCauseZodSchema),
   charitiesController.createCause
 );
+
 router.get('/', charitiesController.getAllCauses);
 router.get('/myCharity',auth(...USER_ROLES.ADMIN,USER_ROLES.ORGANIZER), charitiesController.getCharitiesByUser);
 
 // create cowfounder
 router.post(
   '/cowdFounder',
-  auth(USER_ROLES.ORGANIZER),
+  auth(USER_ROLES.ORGANIZER ,USER_ROLES.USER),
   fileUploadHandler(),
   parseFormDataMiddleware,
   validateRequest(createCrowdfunderZodSchema),

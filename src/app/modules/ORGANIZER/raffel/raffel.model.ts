@@ -43,7 +43,7 @@ const raffleSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'closed'],
+      enum: ['active', 'suspended'],
       default: 'active',
     },
     image: {

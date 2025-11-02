@@ -48,7 +48,6 @@ export interface ICause extends Document {
   registrationNumber?: string;
   category?: 'School' | 'Club' | 'Charity';
   bankDetails?: string;
-  date?: Date;
   addressLine1?: string;
   addressLine2?: string;
   town?: string;
