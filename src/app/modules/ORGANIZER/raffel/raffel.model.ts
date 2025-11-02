@@ -5,7 +5,7 @@ const raffleSchema = new Schema(
     userId: {
       type: Types.ObjectId,
       required: true,
-      ref: 'User', 
+      ref: 'User',
     },
     raffleName: {
       type: String,
@@ -30,7 +30,8 @@ const raffleSchema = new Schema(
       required: true,
     },
     causeId: {
-      type: Schema.Types.ObjectId,ref:"Charities" ,
+      type: Schema.Types.ObjectId,
+      ref: 'Charities',
       required: true,
     },
     ticketSaleEndDate: {
@@ -47,7 +48,7 @@ const raffleSchema = new Schema(
       default: 'active',
     },
     image: {
-      type: String, 
+      type: String,
       required: true,
     },
     raffleDescription: {
@@ -70,38 +71,39 @@ const raffleSchema = new Schema(
       type: Number,
       default: 0,
     },
-    ticketBuyers: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+    ticketBuyers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   },
   {
-    timestamps: true, versionKey:false
+    timestamps: true,
+    versionKey: false,
   }
 );
 
 const Raffle = model('Raffle', raffleSchema);
 
-
-
-
 const AllTicket = new Schema(
   {
     userId: {
       type: Types.ObjectId,
-      ref: "RafflePurchase",
+      ref: 'RafflePurchase',
       required: true,
     },
     raffleId: {
       type: Types.ObjectId,
-      ref: "Raffle",
+      ref: 'Raffle',
       required: true,
     },
     uniqueCode: {
-      type: String},
+      type: String,
+    },
+    winner: { type: Boolean,default:false },
     drawDate: {
-      type: Date},
+      type: Date,
+    },
   },
-  { timestamps: true }
+  { timestamps: true,versionKey:false }
 );
 
-export const Allticket = model("Allticket", AllTicket);
+export const Allticket = model('Allticket', AllTicket);
 
 export default Raffle;

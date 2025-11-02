@@ -30,7 +30,12 @@ const createRaffle = catchAsync(async (req: Request, res: Response) => {
 // Get all raffles
 const getAllRaffles = catchAsync(async (req: Request, res: Response) => {
   const { search, page, limit, ...query } = req.query;
-  const result = await RaffleService.getAllRafflesFromDB({search, page, limit, ...query} );
+  const result = await RaffleService.getAllRafflesFromDB({
+    search,
+    page,
+    limit,
+    ...query,
+  });
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -92,15 +97,16 @@ const allParticipant = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'All User retrived successfully',
-    data:result
+    data: result,
   });
 });
 
+
+
 // ®️Randon Winner
 const getRandomWinner = catchAsync(async (req: Request, res: Response) => {
-  const  raffleId= req.params.id
-  const winner = await RaffleService.getRandomWinner(raffleId,1);
-
+  const raffleId = req.params.id;
+  const winner = await RaffleService.getRandomWinner(raffleId, 1);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -109,15 +115,27 @@ const getRandomWinner = catchAsync(async (req: Request, res: Response) => {
     data: winner,
   });
 });
-const getRandomWinnerMultiple = catchAsync(async (req: Request, res: Response) => {
-  const  raffleId= req.params.id
-  const winner = await RaffleService.getRandomWinner(raffleId,3);
+const getRandomWinnerMultiple = catchAsync(
+  async (req: Request, res: Response) => {
+    const raffleId = req.params.id;
+    const winner = await RaffleService.getRandomWinner(raffleId, 3);
 
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Random winner selected successfully',
+      data: winner,
+    });
+  }
+);
+const allWinner = catchAsync(async (req: Request, res: Response) => {
+  const raffleId = req.params.id;
+  const winner = await RaffleService.allWinner(raffleId);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: 'Random winner selected successfully',
+    message: 'All Winner retrived successfully',
     data: winner,
   });
 });
@@ -131,5 +149,6 @@ export const RaffleController = {
   getMyRaffle,
   allParticipant,
   getRandomWinner,
-  getRandomWinnerMultiple
+  getRandomWinnerMultiple,
+  allWinner,
 };

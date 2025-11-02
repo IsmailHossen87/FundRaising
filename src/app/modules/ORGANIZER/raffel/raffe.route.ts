@@ -59,18 +59,24 @@ router.post(
   '/paymentIntent/:id',
   PaymentController.createPaymentIntentRaffle
 );
-//®️ DRAW RAFFLE 
+
+//®️®️®️®️®️®️®️®️®️®️ DRAW RAFFLE 
 router.get(
   '/random-winner_single/:id',
   auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
   RaffleController.getRandomWinner
 );
-//®️ DRAW RAFFLE 
+//®️®️®️®️®️®️®️®️®️®️ DRAW RAFFLE 
 router.get(
   '/random-winner_multiple/:id',
   auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
   RaffleController.getRandomWinnerMultiple
 );
+//®️®️®️®️®️®️®️®️®️®️ALL winner
+router.get("/winner/:id",
+  auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
+  RaffleController.allWinner
+)
 
 
 // 🔍 Get Single Raffle by ID (Admin / Organizer)
