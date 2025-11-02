@@ -114,13 +114,49 @@ const allParticipant = async () => {
   }
   return result;
 };
+
 // ®️Get Random Draw
-const getRandomWinner = async (id:string,count:number) => { 
-  const raffleID = new mongoose.Types.ObjectId(id)
-  const result = await Allticket.aggregate([
-    { $match: { raffleId: raffleID } }, 
-    { $sample: { size: count } },   
+const getRandomWinner = async (id: string, count: number) => {
+  const raffleID = new mongoose.Types.ObjectId(id);
+
+  const tickets = await Allticket.find({ raffleId: raffleID });
+  if (!tickets.length) {
+    throw new ApiError(
+      StatusCodes.NOT_FOUND,
+      'No tickets found for this raffle'
+    );
+  }
+
+  // Randomly select
+  const winners = await Allticket.aggregate([
+    { $match: { raffleId: raffleID } },
+    { $sample: { size: count } },
   ]);
+
+  const winnerIds = winners.map(w => w._id);
+
+  // Update winners
+  await Allticket.updateMany(
+    { _id: { $in: winnerIds } },
+    { $set: { winner: true } }
+  );
+
+  // ✅ এখন fresh data ফেরত নাও
+  const updatedWinners = await Allticket.find({ _id: { $in: winnerIds } });
+
+  return updatedWinners;
+};
+
+const allWinner = async (id: string) => {
+  const raffleID = new mongoose.Types.ObjectId(id);
+  const Ticket = await Allticket.find({ raffleId: raffleID });
+  if (!Ticket) {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Ticket is not available');
+  }
+  const result = await Allticket.aggregate([
+    { $match: { raffleId: raffleID, winner: true } },
+  ]);
+  console.log(result);
   return result;
 };
 
@@ -132,5 +168,6 @@ export const RaffleService = {
   deleteRaffleFromDB,
   getMyRaffle,
   allParticipant,
-  getRandomWinner
+  getRandomWinner,
+  allWinner,
 };
