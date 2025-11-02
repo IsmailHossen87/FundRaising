@@ -63,7 +63,7 @@ const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
       ticket,
       totalAmount: TotalAmount,
       paymentStatus: "completed",
-      verified: true, // ✅ Auto verified
+      verified: true, 
       stripeSessionId: session.id,
     });
 

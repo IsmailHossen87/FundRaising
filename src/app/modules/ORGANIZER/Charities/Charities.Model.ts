@@ -61,7 +61,6 @@ const causeSchema = new Schema<ICause>(
       enum: ['School', 'Club', 'Charity'],
     },
     bankDetails: { type: String },
-    date: { type: Date, default: Date.now },
     addressLine1: { type: String },
     addressLine2: { type: String },
     town: { type: String },

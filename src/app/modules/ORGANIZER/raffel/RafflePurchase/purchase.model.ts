@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { boolean } from 'zod';
+
 
 const rafflePurchaseSchema = new Schema(
   {
@@ -29,6 +29,7 @@ const rafflePurchaseSchema = new Schema(
       required: true,
     },
     totalAmount: { type: Number, default: 0 },
+    status: { type: String, enum: ['Active', 'Blocked'], default: 'Active' },
     paymentStatus: {
       type: String,
       enum: ['pending', 'completed', 'failed'],

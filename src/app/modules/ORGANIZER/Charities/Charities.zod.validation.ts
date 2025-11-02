@@ -11,7 +11,6 @@ export const createCauseZodSchema = z.object({
       required_error: 'Category is required',
     }),
     bankDetails: z.string({ required_error: 'Bank details are required' }),
-    date: z.coerce.date({ required_error: 'Date is required' }),
     addressLine1: z.string({ required_error: 'Address line 1 is required' }),
     addressLine2: z.string().optional(),
     town: z.string({ required_error: 'Town is required' }),

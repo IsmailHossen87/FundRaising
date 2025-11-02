@@ -1,65 +1,100 @@
 import express from 'express';
 import validateRequest from '../../../middlewares/validateRequest';
+import fileUploadHandler from '../../../middlewares/fileUploadHandler';
+import { parseFormDataMiddleware } from '../../../middlewares/ParseFormData';
+import auth from '../../../middlewares/auth';
+
+import { USER_ROLES } from '../../../../enums/user';
 import { RaffleController } from './raffel.controller';
+import { PaymentController } from '../../Payment/paymentController';
 import {
   createRaffleZodSchema,
   updateRaffleZodSchema,
 } from './raffel.validation';
-import { USER_ROLES } from '../../../../enums/user';
-import auth from '../../../middlewares/auth';
-import fileUploadHandler from '../../../middlewares/fileUploadHandler';
-import { parseFormDataMiddleware } from '../../../middlewares/ParseFormData';
-import { PaymentController } from '../../Payment/paymentController';
 
 const router = express.Router();
-const rolesOfAccess = [USER_ROLES.ORGANIZER];
 
-// Create new raffle
+// ---------------------------------------------
+// 🔐 Role Definitions
+// ---------------------------------------------
+const organizerAccess = [USER_ROLES.ORGANIZER];
+const adminAccess = [USER_ROLES.ADMIN];
+
+// ---------------------------------------------
+// 🎯 Raffle Routes
+// ---------------------------------------------
+
+// 🆕 Create a new Raffle (Organizer only)
 router.post(
   '/',
-  auth(...rolesOfAccess),
+  auth(...organizerAccess),
   fileUploadHandler(),
-  parseFormDataMiddleware, 
+  parseFormDataMiddleware,
   validateRequest(createRaffleZodSchema),
   RaffleController.createRaffle
 );
 
-// Get all raffles
-router.get('/', auth(USER_ROLES.ADMIN), RaffleController.getAllRaffles);
+// 📋 Get All Raffles (Admin only)
+router.get(
+  '/',
+  auth(...adminAccess),
+  RaffleController.getAllRaffles
+);
 
-// Get myRaffle
+// 📦 Get My Raffles (Organizer)
 router.get(
   '/myRaffle',
   auth(USER_ROLES.ORGANIZER),
   RaffleController.getMyRaffle
 );
 
-// Get single raffle by ID
+// 👥 Get All Participants
+router.get(
+  '/participant',
+  RaffleController.allParticipant
+);
+
+// 💳 Create Payment Intent for Raffle
+router.post(
+  '/paymentIntent/:id',
+  PaymentController.createPaymentIntentRaffle
+);
+//®️ DRAW RAFFLE 
+router.get(
+  '/random-winner_single/:id',
+  auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
+  RaffleController.getRandomWinner
+);
+//®️ DRAW RAFFLE 
+router.get(
+  '/random-winner_multiple/:id',
+  auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
+  RaffleController.getRandomWinnerMultiple
+);
+
+
+// 🔍 Get Single Raffle by ID (Admin / Organizer)
 router.get(
   '/:id',
   auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
   RaffleController.getRaffleById
 );
 
-//----------------------   PAYMENNT    ------------------------
-router.post("/paymentIntent/:id",PaymentController.createPaymentIntentRaffle)
-
-
-
-
-// Update raffle
+// ✏️ Update Raffle (Organizer)
 router.patch(
   '/:id',
-  auth(...rolesOfAccess),
+  auth(...organizerAccess),
   validateRequest(updateRaffleZodSchema),
   RaffleController.updateRaffle
 );
 
-// Delete raffle
+// 🗑️ Delete Raffle (Admin / Organizer)
 router.delete(
   '/:id',
   auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
   RaffleController.deleteRaffle
 );
+
+
 
 export const RaffleRoutes = router;

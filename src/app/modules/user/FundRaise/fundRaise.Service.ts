@@ -4,8 +4,19 @@ import { Funding } from './fundRaise.Model';
 import { IfundRaise } from './fundRaise.interface';
 import { Charities } from '../../ORGANIZER/Charities/Charities.Model';
 
-const createFundRaise = async (payload: IfundRaise): Promise<IfundRaise> => {
+const createFundRaise = async (payload: IfundRaise) => {
+  const charity = await Charities.findById(payload.charityId);
+
+  if (!charity) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Charity are not available');
+  }
+
+  if(charity.status === "Pending"){
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Charity Status Pending');
+  }
+
   const result = await Funding.create(payload);
+
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cause');
   }

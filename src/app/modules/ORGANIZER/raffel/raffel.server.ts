@@ -1,12 +1,18 @@
+import { Charities } from './../Charities/Charities.Model';
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../../errors/ApiError';
 import { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { IRaffle } from './raffel.interface';
-import Raffle from './raffel.model';
+import Raffle, { Allticket } from './raffel.model';
+import { RafflePurchase } from './RafflePurchase/purchase.model';
 
 // Create raffle
 const createRaffleToDB = async (payload: IRaffle) => {
+  const cause = await Charities.findById(payload.causeId);
+  if (!cause) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Carity is not Available');
+  }
   const isExist = await Raffle.findOne({ raffleName: payload.raffleName });
   if (isExist) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Raffle name already exists');
@@ -42,7 +48,7 @@ const getAllRafflesFromDB = async (queryFields: Record<string, any>) => {
   queryBuilder = queryBuilder.sort({ createdAt: -1 });
   const result = await queryBuilder;
   const totalNotification = await Raffle.countDocuments(query);
-  const totalActive = await Raffle.countDocuments({status:"active"})
+  const totalActive = await Raffle.countDocuments({ status: 'active' });
   const totalPages = limit ? Math.ceil(totalNotification / Number(limit)) : 1;
 
   return {
@@ -51,7 +57,7 @@ const getAllRafflesFromDB = async (queryFields: Record<string, any>) => {
       limit: Number(limit) || 10,
       page: Number(page) || 1,
       total: totalNotification,
-      active:totalActive,
+      active: totalActive,
       totalPages,
     },
   };
@@ -99,6 +105,24 @@ const deleteRaffleFromDB = async (id: string) => {
   }
   return deleted;
 };
+//all participant
+const allParticipant = async () => {
+  const result = await RafflePurchase.find();
+
+  if (!result) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+  return result;
+};
+// ®️Get Random Draw
+const getRandomWinner = async (id:string,count:number) => { 
+  const raffleID = new mongoose.Types.ObjectId(id)
+  const result = await Allticket.aggregate([
+    { $match: { raffleId: raffleID } }, 
+    { $sample: { size: count } },   
+  ]);
+  return result;
+};
 
 export const RaffleService = {
   createRaffleToDB,
@@ -107,4 +131,6 @@ export const RaffleService = {
   updateRaffleInDB,
   deleteRaffleFromDB,
   getMyRaffle,
+  allParticipant,
+  getRandomWinner
 };

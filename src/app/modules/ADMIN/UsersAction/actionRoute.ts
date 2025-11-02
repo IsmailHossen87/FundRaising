@@ -9,11 +9,12 @@ const router = express.Router();
 const admin = [USER_ROLES.ADMIN]
 router
   .route('/')
-  .get(
-    auth(...admin),
-    actionController.getAllCharitits
-  )
-  // all Count
+  .get(auth(...admin),actionController.getAllCharitits),
+
+ router.route("/allRaffle").get(auth(...admin),actionController.allUserUnderCharity) 
+ router.route("/raffleStatus/:id").patch(auth(...admin),actionController.RaffleStatusChange)
+
+
 
 // USER Status Change
 router

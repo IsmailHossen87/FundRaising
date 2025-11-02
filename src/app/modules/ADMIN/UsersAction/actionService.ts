@@ -4,7 +4,8 @@ import { User } from '../../user/user.model';
 import { JwtPayload } from 'jsonwebtoken';
 import { USER_ROLES } from '../../../../enums/user';
 import { Charities } from '../../ORGANIZER/Charities/Charities.Model';
-
+import Raffle from '../../ORGANIZER/raffel/raffel.model';
+import mongoose from 'mongoose';
 
 const getAllCharitits = async (user: JwtPayload) => {
   if (USER_ROLES.ADMIN !== user.role) {
@@ -25,7 +26,6 @@ const getAllCharitits = async (user: JwtPayload) => {
   return result;
 };
 
-
 const statusChange = async (authUser: JwtPayload, userId: string) => {
   if (authUser.role !== USER_ROLES.ADMIN) {
     throw new ApiError(
@@ -45,8 +45,8 @@ const statusChange = async (authUser: JwtPayload, userId: string) => {
     newStatus = 'Blocked';
   } else if (currentStatus === 'Blocked') {
     newStatus = 'Active';
-  }else{
-    newStatus = 'Active'
+  } else {
+    newStatus = 'Active';
   }
 
   const updatedUser = await User.findByIdAndUpdate(
@@ -91,4 +91,59 @@ const charitistStatus = async (authUser: JwtPayload, charitistId: string) => {
   return updatedUser;
 };
 
-export const actionService = { statusChange, getAllCharitits, charitistStatus };
+// allUser thats have Charity under raffle
+const allUserUnderCharity = async (user: JwtPayload) => {
+  if (USER_ROLES.ADMIN !== user.role) {
+    throw new ApiError(
+      StatusCodes.FORBIDDEN,
+      'Only admin can get all Cheritist'
+    );
+  }
+
+  const allRaffle = await Raffle.find().populate({
+    path: 'causeId',
+    select: 'causeName ',
+  });
+
+  if (!allRaffle) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'Raffle not found');
+  }
+
+  return allRaffle;
+};
+
+// Raffle Status Change
+const RaffleStatusChange = async (user: JwtPayload, raffleId: string) => {
+  if (USER_ROLES.ADMIN !== user.role) {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Only admin can Change Status');
+  }
+
+  const raffle = await Raffle.findById(raffleId);
+  if (!raffle) {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Raffle are not available');
+  }
+  const currentStatus = raffle.status;
+
+  let newStatus;
+  if (currentStatus === 'active') {
+    newStatus = 'Suspended';
+  } else if (currentStatus === 'suspended') {
+    newStatus = 'active';
+  } else {
+    newStatus = 'active';
+  }
+  const UpdateRaffle = await Raffle.findByIdAndUpdate(
+    raffleId,
+    { status: newStatus },
+    { new: true }
+  );
+
+  return UpdateRaffle;
+};
+export const actionService = {
+  statusChange,
+  getAllCharitits,
+  charitistStatus,
+  allUserUnderCharity,
+  RaffleStatusChange,
+};
