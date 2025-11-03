@@ -118,7 +118,9 @@ const getRandomWinner = catchAsync(async (req: Request, res: Response) => {
 const getRandomWinnerMultiple = catchAsync(
   async (req: Request, res: Response) => {
     const raffleId = req.params.id;
-    const winner = await RaffleService.getRandomWinner(raffleId, 3);
+    const totalWinner = req.body.totalWinner
+ 
+    const winner = await RaffleService.getRandomWinner(raffleId, Number(totalWinner));
 
     sendResponse(res, {
       statusCode: StatusCodes.OK,

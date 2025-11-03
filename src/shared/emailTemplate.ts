@@ -1,6 +1,10 @@
 import { ICreateAccount, IResetPassword } from '../types/emailTamplate';
 
-const createAccount = (values: { name: string; email: string; otp: number }) => {
+const createAccount = (values: {
+  name: string;
+  email: string;
+  otp: number;
+}) => {
   const data = {
     to: values.email,
     subject: 'Verify your Fundraising Account',
@@ -20,7 +24,6 @@ const createAccount = (values: { name: string; email: string; otp: number }) => 
   return data;
 };
 
-
 const resetPassword = (values: IResetPassword) => {
   const data = {
     to: values.email,
@@ -39,7 +42,6 @@ const resetPassword = (values: IResetPassword) => {
   };
   return data;
 };
-
 
 const donationConfirmation = (values: {
   name: string;
@@ -66,7 +68,6 @@ const donationConfirmation = (values: {
   };
   return data;
 };
-
 
 const raffleConfirmation = (values: any) => {
   const ticketCodesHtml = values.ticketCodes
@@ -102,13 +103,75 @@ const raffleConfirmation = (values: any) => {
   return data;
 };
 
-export default raffleConfirmation;
+// winner raffle
+const raffleWinner = (values: {
+  name: string;
+  email: string;
+  raffleName: string;
+  code: string | null | undefined;
+  drawdate: Date | null | undefined;
+}) => {
+  const data = {
+    to: values.email,
+    subject: `🎉 Congratulations ${values.name}! You are a Raffle Winner!`,
+    html: `
+      <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 50px; padding: 20px; color: #555;">
+        <div style="width: 100%; max-width: 600px; margin: 0 auto; padding: 25px; background-color: #fff; border-radius: 12px; box-shadow: 0 0 12px rgba(0,0,0,0.1);">
+          <img src="https://ibb.co.com/HDN60nqv" alt="FundRaise Logo" style="display: block; margin: 0 auto 25px; width:150px" />
+          
+          <h2 style="color: #277E16; font-size: 26px; text-align: center;">🎉 Congratulations, ${
+            values.name
+          }!</h2>
+          
+          <p style="text-align: center; color: #333; font-size: 18px; line-height: 1.6; margin-top: 15px;">
+            You’ve been selected as a <strong>winner</strong> in our raffle draw${
+              values.raffleName
+                ? ` for <strong>${values.raffleName}</strong>`
+                : ''
+            }!
+          </p>
+
+          <div style="text-align: center; margin-top: 25px;">
+            ${
+              values.code
+                ? `<p style="color: #555; font-size: 18px; margin-bottom: 10px;">Your Winning Ticket Code:</p>
+                   <div style="background-color: #277E16; color: #fff; display: inline-block; padding: 12px 20px; border-radius: 8px; font-size: 22px; letter-spacing: 2px;">
+                     ${values.code}
+                   </div>`
+                : ''
+            }
+
+            ${
+              values.drawdate
+                ? `<p style="color: #888; font-size: 14px; margin-top: 15px;">Draw Date: ${new Date(
+                    values.drawdate
+                  ).toLocaleDateString()}</p>`
+                : ''
+            }
+          </div>
+
+          <p style="color: #444; font-size: 16px; line-height: 1.6; margin-top: 25px;">
+            Our team will contact you soon with further details about your prize. Please keep this email for your reference.
+          </p>
+
+          <hr style="margin: 25px 0; border: none; border-top: 1px solid #ddd;" />
+
+          <p style="text-align: center; color: #888; font-size: 14px;">
+            Thank you for participating in our raffle!<br/>
+            — The FundRaise Team 💚
+          </p>
+        </div>
+      </body>
+    `,
+  };
+
+  return data;
+};
 
 export const emailTemplate = {
   createAccount,
   resetPassword,
   donationConfirmation,
   raffleConfirmation,
+  raffleWinner,
 };
-
-

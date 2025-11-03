@@ -6,6 +6,8 @@ import mongoose from 'mongoose';
 import { IRaffle } from './raffel.interface';
 import Raffle, { Allticket } from './raffel.model';
 import { RafflePurchase } from './RafflePurchase/purchase.model';
+import { emailTemplate } from '../../../../shared/emailTemplate';
+import { emailHelper } from '../../../../helpers/emailHelper';
 
 // Create raffle
 const createRaffleToDB = async (payload: IRaffle) => {
@@ -127,26 +129,53 @@ const getRandomWinner = async (id: string, count: number) => {
     );
   }
 
-  // Randomly select
   const winners = await Allticket.aggregate([
-    { $match: { raffleId: raffleID } },
+    { $match: { raffleId: raffleID, winner: false } },
     { $sample: { size: count } },
   ]);
 
+  if (!winners.length) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'No eligible tickets found for drawing winners'
+    );
+  }
+
   const winnerIds = winners.map(w => w._id);
 
-  // Update winners
+  // 🔹 Step 4: Update selected tickets to mark them as winners
   await Allticket.updateMany(
     { _id: { $in: winnerIds } },
     { $set: { winner: true } }
   );
 
-  // ✅ এখন fresh data ফেরত নাও
-  const updatedWinners = await Allticket.find({ _id: { $in: winnerIds } });
+  const updatedWinners = await Allticket.find({ _id: { $in: winnerIds } })
+    .populate({ path: 'userId', select: 'firstName surName email' })
+    .populate({ path: 'raffleId', select: 'raffleName' });
+  console.log(updatedWinners);
+  // 🔹 Step 6: Send congratulation emails to each winner
+  for (const winner of updatedWinners) {
+    const user = winner.userId as {
+      firstName: string;
+      surName: string;
+      email: string;
+    };
+    const raffle = winner.raffleId as { raffleName: string };
+
+    const value = {
+      name: `${user.firstName} ${user.surName}`,
+      email: user.email,
+      raffleName: raffle.raffleName,
+      code: winner.uniqueCode,
+      drawdate: winner.drawDate,
+    };
+
+    const CongratulationEmail = emailTemplate.raffleWinner(value);
+    await emailHelper.sendEmail(CongratulationEmail);
+  }
 
   return updatedWinners;
 };
-
 const allWinner = async (id: string) => {
   const raffleID = new mongoose.Types.ObjectId(id);
   const Ticket = await Allticket.find({ raffleId: raffleID });
