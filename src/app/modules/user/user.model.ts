@@ -15,7 +15,7 @@ const userSchema = new Schema<IUser, UserModal>(
     role: {
       type: String,
       enum: Object.values(USER_ROLES),
-      default:USER_ROLES.USER,
+      default: USER_ROLES.USER,
     },
     email: {
       type: String,
@@ -37,7 +37,7 @@ const userSchema = new Schema<IUser, UserModal>(
       type: String,
       default: 'https://i.ibb.co/z5YHLV9/profile.png',
     },
-    joinedDate:{type:Date,default:Date.now},
+    joinedDate: { type: Date, default: Date.now },
     bio: {
       type: String,
       default: '',
@@ -52,6 +52,11 @@ const userSchema = new Schema<IUser, UserModal>(
         required: false,
       },
     },
+    // rafflePurchase
+    ticket: { type: Number, default: 0 },
+    raffleId:[ { type: Schema.Types.ObjectId, ref: 'Raffle' }],
+    totalAmount: { type: Number, default: 0 },
+
     status: {
       type: String,
       enum: ['Active', 'Blocked'],

@@ -126,7 +126,7 @@ const RaffleStatusChange = async (user: JwtPayload, raffleId: string) => {
 
   let newStatus;
   if (currentStatus === 'active') {
-    newStatus = 'Suspended';
+    newStatus = 'suspended';
   } else if (currentStatus === 'suspended') {
     newStatus = 'active';
   } else {

@@ -3,7 +3,6 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../../shared/catchAsync';
 import { RaffleService } from './raffel.server';
 import sendResponse from '../../../../shared/sendResponse';
-import { RafflePurchase } from './RafflePurchase/purchase.model';
 import ApiError from '../../../../errors/ApiError';
 
 const createRaffle = catchAsync(async (req: Request, res: Response) => {
@@ -90,16 +89,16 @@ const deleteRaffle = catchAsync(async (req: Request, res: Response) => {
   });
 });
 // Delete raffle
-const allParticipant = catchAsync(async (req: Request, res: Response) => {
-  const result = await RaffleService.allParticipant();
+// const allParticipant = catchAsync(async (req: Request, res: Response) => {
+//   const result = await RaffleService.allParticipant();
 
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: 'All User retrived successfully',
-    data: result,
-  });
-});
+//   sendResponse(res, {
+//     success: true,
+//     statusCode: StatusCodes.OK,
+//     message: 'All User retrived successfully',
+//     data: result,
+//   });
+// });
 
 
 
@@ -115,6 +114,7 @@ const getRandomWinner = catchAsync(async (req: Request, res: Response) => {
     data: winner,
   });
 });
+
 const getRandomWinnerMultiple = catchAsync(
   async (req: Request, res: Response) => {
     const raffleId = req.params.id;
@@ -149,7 +149,7 @@ export const RaffleController = {
   updateRaffle,
   deleteRaffle,
   getMyRaffle,
-  allParticipant,
+  // allParticipant,
   getRandomWinner,
   getRandomWinnerMultiple,
   allWinner,

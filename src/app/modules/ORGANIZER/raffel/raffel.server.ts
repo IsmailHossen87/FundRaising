@@ -5,7 +5,6 @@ import { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { IRaffle } from './raffel.interface';
 import Raffle, { Allticket } from './raffel.model';
-import { RafflePurchase } from './RafflePurchase/purchase.model';
 import { emailTemplate } from '../../../../shared/emailTemplate';
 import { emailHelper } from '../../../../helpers/emailHelper';
 
@@ -108,16 +107,15 @@ const deleteRaffleFromDB = async (id: string) => {
   return deleted;
 };
 //all participant
-const allParticipant = async () => {
-  const result = await RafflePurchase.find();
+// const allParticipant = async () => {
+//   const result = await RafflePurchase.find();
 
-  if (!result) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
-  }
-  return result;
-};
+//   if (!result) {
+//     throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
+//   }
+//   return result;
+// };
 
-// ®️Get Random Draw
 const getRandomWinner = async (id: string, count: number) => {
   const raffleID = new mongoose.Types.ObjectId(id);
 
@@ -143,17 +141,21 @@ const getRandomWinner = async (id: string, count: number) => {
 
   const winnerIds = winners.map(w => w._id);
 
-  // 🔹 Step 4: Update selected tickets to mark them as winners
   await Allticket.updateMany(
     { _id: { $in: winnerIds } },
     { $set: { winner: true } }
   );
 
+  // Change Raffle Status
+   await Raffle.findByIdAndUpdate(id,{status:"closed"})
+  // Fetch winners with user & raffle info
   const updatedWinners = await Allticket.find({ _id: { $in: winnerIds } })
     .populate({ path: 'userId', select: 'firstName surName email' })
     .populate({ path: 'raffleId', select: 'raffleName' });
-  console.log(updatedWinners);
-  // 🔹 Step 6: Send congratulation emails to each winner
+
+  // 🔹 Group winners by userId so one email per user
+  const userMap = new Map< string, { user: any; raffleName: string; tickets: string[] }>();
+
   for (const winner of updatedWinners) {
     const user = winner.userId as {
       firstName: string;
@@ -162,12 +164,24 @@ const getRandomWinner = async (id: string, count: number) => {
     };
     const raffle = winner.raffleId as { raffleName: string };
 
+    if (!userMap.has(user.email)) {
+      userMap.set(user.email, {
+        user,
+        raffleName: raffle.raffleName,
+        tickets: winner.uniqueCode ? [winner.uniqueCode] : [],
+      });
+    } else if (winner.uniqueCode) {
+      userMap.get(user.email)!.tickets.push(winner.uniqueCode);
+    }
+  }
+
+  // 🔹 Send one email per user
+  for (const { user, raffleName, tickets } of userMap.values()) {
     const value = {
       name: `${user.firstName} ${user.surName}`,
       email: user.email,
-      raffleName: raffle.raffleName,
-      code: winner.uniqueCode,
-      drawdate: winner.drawDate,
+      raffleName,
+      ticketCodes: tickets,
     };
 
     const CongratulationEmail = emailTemplate.raffleWinner(value);
@@ -176,6 +190,7 @@ const getRandomWinner = async (id: string, count: number) => {
 
   return updatedWinners;
 };
+
 const allWinner = async (id: string) => {
   const raffleID = new mongoose.Types.ObjectId(id);
   const Ticket = await Allticket.find({ raffleId: raffleID });
@@ -185,7 +200,6 @@ const allWinner = async (id: string) => {
   const result = await Allticket.aggregate([
     { $match: { raffleId: raffleID, winner: true } },
   ]);
-  console.log(result);
   return result;
 };
 
@@ -196,7 +210,7 @@ export const RaffleService = {
   updateRaffleInDB,
   deleteRaffleFromDB,
   getMyRaffle,
-  allParticipant,
+  // allParticipant,
   getRandomWinner,
   allWinner,
 };

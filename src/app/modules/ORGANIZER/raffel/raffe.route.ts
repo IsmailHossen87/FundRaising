@@ -49,14 +49,14 @@ router.get(
 );
 
 // 👥 Get All Participants
-router.get(
-  '/participant',
-  RaffleController.allParticipant
-);
+// router.get(
+//   '/participant',
+//   RaffleController.allParticipant
+// );
 
 // 💳 Create Payment Intent for Raffle
 router.post(
-  '/paymentIntent/:id',
+  '/paymentIntent/:id',auth(USER_ROLES.USER),
   PaymentController.createPaymentIntentRaffle
 );
 
