@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { USER_ROLES } from '../../../enums/user';
 
 export type IUser = {
@@ -18,6 +18,10 @@ export type IUser = {
     phone?: string;
     bio?: string;
   };
+  // for raffle
+  ticket?: number;
+  raffleId: Types.ObjectId[];
+  totalAmount: Number;
 
   address?: {
     country?: string;
@@ -27,16 +31,18 @@ export type IUser = {
   };
   // StripeAccountInfo
   stripeAccountInfo?: {
-    stripeCustomerId?: string; 
+    stripeCustomerId?: string;
     loginUrl?: string;
   } | null;
   location?: string;
-  joinedDate:Date;
+  joinedDate: Date;
   authentication?: {
     isResetPassword: boolean;
     oneTimeCode: number | null;
     expireAt: Date | null;
   };
+  paymentIntentId: String;
+  stripeSessionId: String;
 };
 
 export type UserModal = {

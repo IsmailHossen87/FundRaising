@@ -46,7 +46,7 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
         const metadata = session.metadata || {};
 
         //  Raffle Payment
-        if ((metadata.type === 'raffle')) {
+        if ((metadata.raffleId && metadata.userId)) {
           await handlePayment.handleRaffleBuy(session);
           //  Charity Donation
         } else if ((metadata.type === 'charity')) {

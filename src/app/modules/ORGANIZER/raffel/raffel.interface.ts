@@ -13,6 +13,7 @@ export type IRaffle = {
   ticketSaleEndDate: Date;
   drawDate: Date;
   status: 'active' | 'suspended';
+  buyerMessage:String[],
   image: string;
   raffleDescription: string;
   prizes: string;

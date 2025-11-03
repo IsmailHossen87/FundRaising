@@ -44,7 +44,7 @@ const raffleSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'suspended'],
+      enum: ['active', 'suspended',"closed"],
       default: 'active',
     },
     image: {
@@ -63,6 +63,7 @@ const raffleSchema = new Schema(
       type: Number,
       default: 0,
     },
+    buyerMessage:[{type:String}],
     amount: {
       type: Number,
       default: 0,
@@ -85,7 +86,7 @@ const AllTicket = new Schema(
   {
     userId: {
       type: Types.ObjectId,
-      ref: 'RafflePurchase',
+      ref: 'User',
       required: true,
     },
     raffleId: {
