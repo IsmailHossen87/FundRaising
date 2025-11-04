@@ -7,10 +7,14 @@ import Raffle, { Allticket } from './raffel.model';
 import { emailTemplate } from '../../../../shared/emailTemplate';
 import { emailHelper } from '../../../../helpers/emailHelper';
 import { User } from '../../user/user.model';
+import { QueryBuilder } from '../../../../util/QueryBuilder';
+import { RaffleSeacrchFields } from './RaffleConstant';
 
 // Create raffle
 const createRaffleToDB = async (payload: IRaffle) => {
-  const cause = await Charities.findById(payload.causeId);
+  const cause = await Charities.findByIdAndUpdate(payload.causeId, {
+    raffleId: new mongoose.Types.ObjectId(payload.causeId),
+  });
   if (!cause) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Carity is not Available');
   }
@@ -23,45 +27,22 @@ const createRaffleToDB = async (payload: IRaffle) => {
   return result;
 };
 
-// Get all raffles
-const getAllRafflesFromDB = async (queryFields: Record<string, any>) => {
-  const { search, page, limit, ...filters } = queryFields;
-  const query = search
-    ? {
-        $or: [
-          { type: { $regex: search, $options: 'i' } },
-          { title: { $regex: search, $options: 'i' } },
-          { recipientGroup: { $regex: search, $options: 'i' } },
-        ],
-        ...filters,
-      }
-    : { ...filters };
+const getAllRafflesFromDB = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(Raffle.find(), query);
 
-  let queryBuilder = Raffle.find(query);
+  const allRaffles = queryBuilder
+    .search(RaffleSeacrchFields)
+    .filter()
+    .sort()
+    .fields()
+    .paginate();
 
-  if (page && limit) {
-    queryBuilder = queryBuilder
-      .skip((Number(page) - 1) * Number(limit))
-      .limit(Number(limit));
-  } else {
-    queryBuilder = queryBuilder.skip(0).limit(10);
-  }
-  queryBuilder = queryBuilder.sort({ createdAt: -1 });
-  const result = await queryBuilder;
-  const totalNotification = await Raffle.countDocuments(query);
-  const totalActive = await Raffle.countDocuments({ status: 'active' });
-  const totalPages = limit ? Math.ceil(totalNotification / Number(limit)) : 1;
+  const [data, meta] = await Promise.all([
+    allRaffles.build(),
+    queryBuilder.getMeta(),
+  ]);
 
-  return {
-    result,
-    meta: {
-      limit: Number(limit) || 10,
-      page: Number(page) || 1,
-      total: totalNotification,
-      active: totalActive,
-      totalPages,
-    },
-  };
+  return { data, meta };
 };
 
 // Get single raffle
@@ -73,21 +54,35 @@ const getRaffleByIdFromDB = async (id: string) => {
   return raffle;
 };
 
+
 // Get my raffle
-const getMyRaffle = async (id: string) => {
+const getMyRaffle = async (id: string, query: Record<string, any>) => {
   if (!mongoose.isValidObjectId(id)) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid user ID format');
   }
-  const objectId = new mongoose.Types.ObjectId(id);
 
-  const raffle = await Raffle.find({ userId: objectId });
+  const userId = new mongoose.Types.ObjectId(id);
 
-  if (!raffle || raffle.length === 0) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Raffle not found');
-  }
+  // Find all raffles created by this user
+  const raffleQuery = Raffle.find({ userId });
 
-  return raffle;
+  // Apply query builder utilities (search, filter, sort, etc.)
+  const queryBuilder = new QueryBuilder(raffleQuery, query)
+    .search(RaffleSeacrchFields)
+    .filter()
+    .sort()
+    .fields()
+    .paginate();
+
+  // Run queries
+  const [data, meta] = await Promise.all([
+    queryBuilder.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return { data, meta };
 };
+
 
 // Update raffle
 const updateRaffleInDB = async (id: string, payload: Partial<IRaffle>) => {
@@ -149,7 +144,7 @@ const getRandomWinner = async (id: string, count: number) => {
   );
 
   // Change Raffle Status
-  await Raffle.findByIdAndUpdate(id, { status: 'closed',draw:"success" });
+  await Raffle.findByIdAndUpdate(id, { status: 'closed', draw: 'success' });
 
   const updatedWinners = await Allticket.find({ _id: { $in: winnerIds } })
     .populate({ path: 'userId', select: 'firstName surName email' })
@@ -183,7 +178,7 @@ const getRandomWinner = async (id: string, count: number) => {
   // 🔹 Send one email per user
   for (const { user, raffleName, tickets } of userMap.values()) {
     const value = {
-      name: `${user.firstName} ${user.surName}`,
+      name: `${user.name}`,
       email: user.email,
       raffleName,
       ticketCodes: tickets,
@@ -198,6 +193,10 @@ const getRandomWinner = async (id: string, count: number) => {
 
 const allWinner = async (id: string) => {
   const raffleID = new mongoose.Types.ObjectId(id);
+  const raffle = await Raffle.findById(id);
+  if (!raffle) {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Raffle is not available');
+  }
   const Ticket = await Allticket.find({ raffleId: raffleID });
   if (!Ticket) {
     throw new ApiError(StatusCodes.FORBIDDEN, 'Ticket is not available');

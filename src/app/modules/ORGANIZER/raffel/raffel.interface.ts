@@ -18,7 +18,7 @@ export type IRaffle = {
   draw:"pending" | "success"
   raffleDescription: string;
   prizes: string;
-  targetsold: number;
+  ticketAmount: number;
   amount: number;
   sold:number,
   ticketBuyers: Types.ObjectId[];

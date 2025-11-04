@@ -19,6 +19,7 @@ export interface ICause extends Document {
   userId: Types.ObjectId;
   donner: Types.ObjectId[];
   fundRaiser: Types.ObjectId[];
+  raffleId: Types.ObjectId[];
   status: CampaignStatus;
   coverImage?: string;
   description?: string;

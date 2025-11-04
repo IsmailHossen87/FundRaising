@@ -14,15 +14,10 @@ import {
 
 const router = express.Router();
 
-// ---------------------------------------------
-// 🔐 Role Definitions
-// ---------------------------------------------
+
 const organizerAccess = [USER_ROLES.ORGANIZER];
 const adminAccess = [USER_ROLES.ADMIN];
 
-// ---------------------------------------------
-// 🎯 Raffle Routes
-// ---------------------------------------------
 
 // 🆕 Create a new Raffle (Organizer only)
 router.post(

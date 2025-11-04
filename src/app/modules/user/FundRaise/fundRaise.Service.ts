@@ -8,17 +8,17 @@ const createFundRaise = async (payload: IfundRaise) => {
   const charity = await Charities.findById(payload.charityId);
 
   if (!charity) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Charity are not available');
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Charity are not available');
   }
 
   if(charity.status === "Pending"){
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Charity Status Pending');
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Charity Status Pending');
   }
 
   const result = await Funding.create(payload);
 
   if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cause');
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Failed to create cause');
   }
 
   const charityId = result.charityId.toString();
@@ -32,7 +32,7 @@ const createFundRaise = async (payload: IfundRaise) => {
 const getAllFundRaiser = async () => {
   const result = await Funding.find();
   if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create cause');
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Failed to create cause');
   }
 
   return result;

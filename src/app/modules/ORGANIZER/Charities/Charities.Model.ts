@@ -60,6 +60,7 @@ const causeSchema = new Schema<ICause>(
       type: String,
       enum: ['School', 'Club', 'Charity'],
     },
+    raffleId:[{type:Schema.Types.ObjectId,ref:"Raffle"}],
     bankDetails: { type: String },
     addressLine1: { type: String },
     addressLine2: { type: String },

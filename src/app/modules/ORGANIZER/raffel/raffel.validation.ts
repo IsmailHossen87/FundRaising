@@ -11,7 +11,7 @@ export const createRaffleZodSchema = z.object({
         required_error: 'Organizer phone number is required',
       }),
     }),
-    targetAmount: z
+    ticketAmount: z
       .number()
       .min(1, { message: 'Target amount must be greater than 0' }),
     causeId: z.string({ required_error: 'Cause is required' }),
@@ -35,7 +35,7 @@ export const updateRaffleZodSchema = z.object({
         phoneNumber: z.string().optional(),
       })
       .optional(),
-    targetAmount: z.number().min(1).optional(),
+    ticketAmount: z.number().min(1).optional(),
     causeId: z.string().optional(),
     ticketSaleEndDate: z.coerce.date().optional(),
     drawDate: z.coerce.date().optional(),

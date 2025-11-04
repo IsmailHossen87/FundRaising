@@ -26,7 +26,7 @@ const raffleSchema = new Schema(
         required: true,
       },
     },
-    targetAmount: {
+    ticketAmount: {
       type: Number,
       required: true,
     },
