@@ -26,14 +26,25 @@ export const createRafflePaymentIntent = async (
   userData: RaffleUserData
 ) => {
   const raffle = await Raffle.findById(raffleId);
+
   if (!raffle) throw new ApiError(StatusCodes.NOT_FOUND, "Raffle not found!");
   if (raffle.status === "suspended")
     throw new ApiError(StatusCodes.BAD_REQUEST, "The Raffle is Suspended!");
 
+
+  const currentDate = new Date();
+  if (raffle.ticketSaleEndDate && currentDate > new Date(raffle.ticketSaleEndDate)) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Ticket sale period is over. You can no longer purchase tickets for this raffle."
+    );
+  }
+
+
   const user = await User.findById(userData.userId);
   if (!user) throw new ApiError(StatusCodes.NOT_FOUND, "User not found!");
 
-  const totalAmount = Number(raffle.targetAmount) * ticketCount;
+  const totalAmount = Number(raffle.ticketAmount) * ticketCount;
   const productName = `Raffle Tickets - ${raffle.raffleName}`;
 
   // Stripe Customer

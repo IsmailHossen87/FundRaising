@@ -4,6 +4,7 @@ import { charitiesService } from './Charities.Service';
 import catchAsync from '../../../../shared/catchAsync';
 import { Charities } from './Charities.Model';
 import sendResponse from '../../../../shared/sendResponse';
+import mongoose from 'mongoose';
 
 // CREATECAUSE
 const createCause = async (req: Request, res: Response) => {
@@ -56,7 +57,7 @@ const getAllCauses = async (req: Request, res: Response) => {
 const getCharitiesByUser = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
 
-  const charities = await Charities.find();
+  const charities = await Charities.find({userId:new mongoose.Types.ObjectId(userId)});
 
   sendResponse(res, {
     success: true,

@@ -28,38 +28,36 @@ const createRaffle = catchAsync(async (req: Request, res: Response) => {
 
 // Get all raffles
 const getAllRaffles = catchAsync(async (req: Request, res: Response) => {
-  const { search, page, limit, ...query } = req.query;
-  const result = await RaffleService.getAllRafflesFromDB({
-    search,
-    page,
-    limit,
-    ...query,
-  });
+  const query = req.query;
+  const result = await RaffleService.getAllRafflesFromDB(query as Record<string, string>);
+
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
-    message: 'Raffles fetched successfully',
+    message: "Raffles fetched successfully",
+    data: result.data, 
+    meta: result.meta, 
+  });
+});
+
+
+// // Get raffle by ID
+const getRaffleById = catchAsync(async (req: Request, res: Response) => {
+  const result = await RaffleService.getRaffleByIdFromDB(req.params.id);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Raffle fetched successfully',
     data: result,
   });
 });
 
-// Get raffle by ID
-const getRaffleById = catchAsync(async (req: Request, res: Response) => {
-  const result = await RaffleService.getRaffleByIdFromDB(req.params.id);
-  sendResponse(res, {
-    // pagination:{
-    //   ...result.meta
-    // },
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: 'Raffle fetched successfully',
-    data: result,
-  });
-});
+
 // Get my raffle
 const getMyRaffle = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const result = await RaffleService.getMyRaffle(userId);
+  const query = req.query 
+  const result = await RaffleService.getMyRaffle(userId ,query as Record<string,string>);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -67,6 +65,7 @@ const getMyRaffle = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 
 // Update raffle
 const updateRaffle = catchAsync(async (req: Request, res: Response) => {
@@ -100,8 +99,6 @@ const allParticipant = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-
 // ®️Randon Winner
 const getRandomWinner = catchAsync(async (req: Request, res: Response) => {
   const raffleId = req.params.id;
@@ -130,6 +127,7 @@ const getRandomWinnerMultiple = catchAsync(
     });
   }
 );
+// All Winner
 const allWinner = catchAsync(async (req: Request, res: Response) => {
   const raffleId = req.params.id;
   const winner = await RaffleService.allWinner(raffleId);
