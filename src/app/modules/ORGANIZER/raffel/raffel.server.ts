@@ -1,12 +1,12 @@
 import { Charities } from './../Charities/Charities.Model';
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../../errors/ApiError';
-import { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { IRaffle } from './raffel.interface';
 import Raffle, { Allticket } from './raffel.model';
 import { emailTemplate } from '../../../../shared/emailTemplate';
 import { emailHelper } from '../../../../helpers/emailHelper';
+import { User } from '../../user/user.model';
 
 // Create raffle
 const createRaffleToDB = async (payload: IRaffle) => {
@@ -106,15 +106,17 @@ const deleteRaffleFromDB = async (id: string) => {
   }
   return deleted;
 };
-//all participant
-// const allParticipant = async () => {
-//   const result = await RafflePurchase.find();
+// all participant
+const allParticipant = async () => {
+  const usersWithRaffle = await User.find({
+    'raffleId.0': { $exists: true },
+  });
 
-//   if (!result) {
-//     throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
-//   }
-//   return result;
-// };
+  if (!usersWithRaffle) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
+  }
+  return usersWithRaffle;
+};
 
 const getRandomWinner = async (id: string, count: number) => {
   const raffleID = new mongoose.Types.ObjectId(id);
@@ -147,14 +149,17 @@ const getRandomWinner = async (id: string, count: number) => {
   );
 
   // Change Raffle Status
-   await Raffle.findByIdAndUpdate(id,{status:"closed"})
-  // Fetch winners with user & raffle info
+  await Raffle.findByIdAndUpdate(id, { status: 'closed',draw:"success" });
+
   const updatedWinners = await Allticket.find({ _id: { $in: winnerIds } })
     .populate({ path: 'userId', select: 'firstName surName email' })
     .populate({ path: 'raffleId', select: 'raffleName' });
 
   // 🔹 Group winners by userId so one email per user
-  const userMap = new Map< string, { user: any; raffleName: string; tickets: string[] }>();
+  const userMap = new Map<
+    string,
+    { user: any; raffleName: string; tickets: string[] }
+  >();
 
   for (const winner of updatedWinners) {
     const user = winner.userId as {
@@ -199,6 +204,28 @@ const allWinner = async (id: string) => {
   }
   const result = await Allticket.aggregate([
     { $match: { raffleId: raffleID, winner: true } },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'userData',
+      },
+    },
+    {
+      $unwind: '$userData',
+    },
+    {
+      $project: {
+        _id: 1,
+        raffleId: 1,
+        uniqueCode: 1,
+        winner: 1,
+        drawDate: 1,
+        'userData.name': 1,
+        'userData.email': 1,
+      },
+    },
   ]);
   return result;
 };
@@ -210,7 +237,7 @@ export const RaffleService = {
   updateRaffleInDB,
   deleteRaffleFromDB,
   getMyRaffle,
-  // allParticipant,
+  allParticipant,
   getRandomWinner,
   allWinner,
 };

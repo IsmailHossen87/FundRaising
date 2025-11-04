@@ -82,6 +82,21 @@ const RaffleStatusChange = catchAsync(
     });
   }
 );
+//Raffle Status Change
+const dashboard = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+  
+    const user = req.user
+    const result = await actionService.dashboard(user)
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Raffle Status Change successfully',
+      data: result,
+    });
+  }
+);
 
 
-export const actionController ={statusChange,getAllCharitits,charitistStatus,allUserUnderCharity,RaffleStatusChange}
+export const actionController ={statusChange,getAllCharitits,charitistStatus,allUserUnderCharity,RaffleStatusChange,dashboard}

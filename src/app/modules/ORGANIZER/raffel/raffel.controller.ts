@@ -88,17 +88,17 @@ const deleteRaffle = catchAsync(async (req: Request, res: Response) => {
     message: 'Raffle deleted successfully',
   });
 });
-// Delete raffle
-// const allParticipant = catchAsync(async (req: Request, res: Response) => {
-//   const result = await RaffleService.allParticipant();
+// All Participant
+const allParticipant = catchAsync(async (req: Request, res: Response) => {
+  const result = await RaffleService.allParticipant();
 
-//   sendResponse(res, {
-//     success: true,
-//     statusCode: StatusCodes.OK,
-//     message: 'All User retrived successfully',
-//     data: result,
-//   });
-// });
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'All User retrived successfully',
+    data: result,
+  });
+});
 
 
 
@@ -149,7 +149,7 @@ export const RaffleController = {
   updateRaffle,
   deleteRaffle,
   getMyRaffle,
-  // allParticipant,
+  allParticipant,
   getRandomWinner,
   getRandomWinnerMultiple,
   allWinner,
