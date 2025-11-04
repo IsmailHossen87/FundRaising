@@ -1,4 +1,5 @@
 import { Schema, model, Types } from 'mongoose';
+import { string } from 'zod';
 
 const raffleSchema = new Schema(
   {
@@ -68,6 +69,7 @@ const raffleSchema = new Schema(
       type: Number,
       default: 0,
     },
+    draw:{type:String,   enum: ['pending', 'successs'],default:"pending"},
     sold: {
       type: Number,
       default: 0,

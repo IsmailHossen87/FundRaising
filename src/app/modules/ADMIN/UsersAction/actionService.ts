@@ -6,6 +6,7 @@ import { USER_ROLES } from '../../../../enums/user';
 import { Charities } from '../../ORGANIZER/Charities/Charities.Model';
 import Raffle from '../../ORGANIZER/raffel/raffel.model';
 import mongoose from 'mongoose';
+import { Dooner } from '../../ORGANIZER/Charities/Donner.model';
 
 const getAllCharitits = async (user: JwtPayload) => {
   if (USER_ROLES.ADMIN !== user.role) {
@@ -140,10 +141,41 @@ const RaffleStatusChange = async (user: JwtPayload, raffleId: string) => {
 
   return UpdateRaffle;
 };
+// All DashBoard
+const dashboard = async (user: JwtPayload) => {
+  if (USER_ROLES.ADMIN !== user.role) {
+    throw new ApiError(StatusCodes.FORBIDDEN, 'Only admin can view dashboard');
+  }
+
+  // 🎟️ Total active raffles
+  const raffleCount = await Raffle.countDocuments({ status: 'active' });
+  const donorCount = await Dooner.countDocuments();
+  const charities = await Charities.find();
+
+  const totalRaffles = await Raffle.countDocuments();
+  const successRaffles = await Raffle.countDocuments({ draw: 'success' });
+  // 📊 Calculate success percentage
+  const SuccessDraw =
+    totalRaffles > 0 ? ((successRaffles / totalRaffles) * 100).toFixed(2)+"%" : 0;
+
+  const totalCollection = charities.reduce((sum, item) => {
+    return sum + (item.Totalcollection || 0);
+  }, 0);
+
+  // ✅ Return everything together
+  return {
+    raffleCount,
+    donorCount,
+    SuccessDraw,
+    totalCollection,
+  };
+};
+
 export const actionService = {
   statusChange,
   getAllCharitits,
   charitistStatus,
   allUserUnderCharity,
   RaffleStatusChange,
+  dashboard,
 };

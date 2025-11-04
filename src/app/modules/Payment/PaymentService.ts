@@ -5,6 +5,7 @@ import config from "../../../config";
 import ApiError from "../../../errors/ApiError";
 import { User } from "../user/user.model";
 import { Charities } from "../ORGANIZER/Charities/Charities.Model";
+import mongoose from "mongoose";
 
 interface RaffleUserData {
   userId: string;
@@ -86,6 +87,7 @@ export const createCharityPaymentIntent = async (
 ) => {
   const charity = await Charities.findById(charityId);
   if (!charity) throw new ApiError(StatusCodes.NOT_FOUND, "Charity not found!");
+
   if (isNaN(totalAmount) || totalAmount <= 0)
     throw new ApiError(StatusCodes.BAD_REQUEST, "Invalid donation amount");
 
@@ -100,7 +102,7 @@ export const createCharityPaymentIntent = async (
   // Metadata
   const metadata = {
     type: "charity",
-    // causeId: charity._id.toString(),
+    causeId: (charity._id as mongoose.Types.ObjectId).toString(),
     amount: String(totalAmount),
     firstName: userData.firstName,
     surName: userData.surName || "",

@@ -11,6 +11,7 @@ router
   .route('/')
   .get(auth(...admin),actionController.getAllCharitits),
 
+ router.route("/dashboard").get(auth(...admin),actionController.dashboard) 
  router.route("/allRaffle").get(auth(...admin),actionController.allUserUnderCharity) 
  router.route("/raffleStatus/:id").patch(auth(...admin),actionController.RaffleStatusChange)
 
