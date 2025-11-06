@@ -1,8 +1,13 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { AuthService } from './auth.service';
+import ApiError from '../../../errors/ApiError';
+import httpStatus from "http-status-codes";
+import config from '../../../config';
+import { JwtPayload } from 'jsonwebtoken';
+import { jwtHelper } from '../../../helpers/jwtHelper';
 
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   const { ...verifyData } = req.body;
@@ -57,7 +62,7 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 const changePassword = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
   const { ...passwordData } = req.body;
-  await AuthService.changePasswordToDB(user, passwordData);
+  await AuthService.changePasswordToDB(user as JwtPayload, passwordData);
 
   sendResponse(res, {
     success: true,
@@ -66,10 +71,52 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+// 🔁 Google OAuth2 Callback
+const googleCallbackController = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    let redirectTo = req.query.state ? (req.query.state as string) : "/";
+    if (redirectTo.startsWith("/")) {
+      redirectTo = redirectTo.slice(1);
+    }
+
+    const user = req.user as any; 
+    if (!user) {
+      throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+    // 🔐 Create JWT token for the logged-in user
+    const token = jwtHelper.createToken(
+      {
+        id: user._id,
+        role: user.role,
+        email: user.email,
+      },
+      config.jwt.jwt_secret as string,
+      config.jwt.jwt_expire_in as string
+    );
+
+    // 🔁 Option 1: Redirect with token as query parameter
+    res.redirect(`${config.FRONTEND_URL}/${redirectTo}?token=${token}`);
+
+    // 🔁 Option 2 (more secure): Set token in cookie
+    /*
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: config.env === "production",
+      sameSite: "lax",
+    });
+    res.redirect(`${config.FRONTEND_URL}/${redirectTo}`);
+    */
+  }
+);
+
+
 export const AuthController = {
   verifyEmail,
   loginUser,
   forgetPassword,
   resetPassword,
   changePassword,
+  googleCallbackController
 };
