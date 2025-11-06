@@ -4,7 +4,12 @@ import { model, Schema } from 'mongoose';
 import config from '../../../config';
 import { USER_ROLES } from '../../../enums/user';
 import ApiError from '../../../errors/ApiError';
-import { IUser, UserModal } from './user.interface';
+import { IAuthProvider, IUser, UserModal } from './user.interface';
+
+const authProviderSchema = new Schema<IAuthProvider>({
+  provider: { type: String, required: true },
+  providerId: { type: String, required: true },
+});
 
 const userSchema = new Schema<IUser, UserModal>(
   {
@@ -29,10 +34,11 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     password: {
       type: String,
-      required: true,
-      select: 0,
-      minlength: 8,
+      required: function () {
+        return !this.auths || this.auths.length === 0;
+      },
     },
+
     image: {
       type: String,
       default: 'https://i.ibb.co/z5YHLV9/profile.png',
@@ -54,7 +60,7 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     // rafflePurchase
     ticket: { type: Number, default: 0 },
-    raffleId:[ { type: Schema.Types.ObjectId, ref: 'Raffle' }],
+    raffleId: [{ type: Schema.Types.ObjectId, ref: 'Raffle' }],
     totalAmount: { type: Number, default: 0 },
 
     status: {
@@ -78,6 +84,7 @@ const userSchema = new Schema<IUser, UserModal>(
       postalCode: { type: String, default: '' },
       street: { type: String, default: '' },
     },
+    auths: [authProviderSchema],
     authentication: {
       type: {
         isResetPassword: { type: Boolean, default: false },

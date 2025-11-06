@@ -1,6 +1,11 @@
 import { Model, Types } from 'mongoose';
 import { USER_ROLES } from '../../../enums/user';
 
+export interface IAuthProvider {
+    provider:"google" | "credentials",
+    providerId:string
+}
+
 export type IUser = {
   name: string;
   role: USER_ROLES;
@@ -21,6 +26,7 @@ export type IUser = {
   // for raffle
   ticket?: number;
   raffleId: Types.ObjectId[];
+  auths:IAuthProvider[];
   totalAmount: Number;
 
   address?: {
