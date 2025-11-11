@@ -4,12 +4,13 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../../shared/catchAsync';
 import sendResponse from '../../../../shared/sendResponse';
 import { actionService } from './actionService';
+import { JwtPayload } from 'jsonwebtoken';
 
 //Get All Raffle
 const getAllCharitits = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
-    const result = await actionService.getAllCharitits(user)
+    const result = await actionService.getAllCharitits(user as JwtPayload)
 
     sendResponse(res, {
       success: true,
@@ -26,7 +27,7 @@ const statusChange = catchAsync(
     const user = req.user;
     const userId = req.params.id 
 
-    const result = await actionService.statusChange(user,userId)
+    const result = await actionService.statusChange(user as JwtPayload,userId)
 
     sendResponse(res, {
       success: true,
@@ -42,7 +43,7 @@ const charitistStatus = catchAsync(
     const user = req.user;
     const charitistId = req.params.id 
 
-    const result = await actionService.charitistStatus(user,charitistId)
+    const result = await actionService.charitistStatus(user as JwtPayload,charitistId)
 
     sendResponse(res, {
       success: true,
@@ -57,13 +58,16 @@ const charitistStatus = catchAsync(
 const allUserUnderCharity = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
-    const result = await actionService.allUserUnderCharity(user)
+    const query = req.query;
+    const result = await actionService.getAllRafflesFromDB(user as JwtPayload , query as Record<string,string>)
 
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: 'All Raffle retrived successfully',
-      data: result,
+      meta:result.meta,
+      data: result.data,
+      
     });
   }
 );
@@ -72,7 +76,7 @@ const RaffleStatusChange = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const raffleId = req.params.id  
     const user = req.user
-    const result = await actionService.RaffleStatusChange(user,raffleId)
+    const result = await actionService.RaffleStatusChange(user as JwtPayload,raffleId)
 
     sendResponse(res, {
       success: true,
@@ -87,7 +91,7 @@ const dashboard = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
   
     const user = req.user
-    const result = await actionService.dashboard(user)
+    const result = await actionService.dashboard(user as JwtPayload)
 
     sendResponse(res, {
       success: true,

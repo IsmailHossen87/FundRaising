@@ -5,8 +5,10 @@ import { JwtPayload } from 'jsonwebtoken';
 import { USER_ROLES } from '../../../../enums/user';
 import { Charities } from '../../ORGANIZER/Charities/Charities.Model';
 import Raffle from '../../ORGANIZER/raffel/raffel.model';
-import mongoose from 'mongoose';
 import { Dooner } from '../../ORGANIZER/Charities/Donner.model';
+import { QueryBuilder } from '../../../../util/QueryBuilder';
+import { excludeField } from '../../../../util/Constants';
+
 
 const getAllCharitits = async (user: JwtPayload) => {
   if (USER_ROLES.ADMIN !== user.role) {
@@ -92,25 +94,32 @@ const charitistStatus = async (authUser: JwtPayload, charitistId: string) => {
   return updatedUser;
 };
 
-// allUser thats have Charity under raffle
-const allUserUnderCharity = async (user: JwtPayload) => {
+const getAllRafflesFromDB = async (
+  user: JwtPayload,
+  query: Record<string, string>
+) => {
   if (USER_ROLES.ADMIN !== user.role) {
     throw new ApiError(
-      StatusCodes.FORBIDDEN,
-      'Only admin can get all Cheritist'
+      StatusCodes.BAD_REQUEST,
+      'You are not permit for this Api'
     );
   }
+  const queryBuilder = new QueryBuilder(Raffle.find(), query);
 
-  const allRaffle = await Raffle.find().populate({
-    path: 'causeId',
-    select: 'causeName ',
-  });
+  const allRaffles = queryBuilder
+    .search(excludeField)
+    .filter()
+    .dateRange()
+    .sort()
+    .fields()
+    .paginate();
 
-  if (!allRaffle) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Raffle not found');
-  }
+  const [meta, data] = await Promise.all([
+    queryBuilder.getMeta(),
+    allRaffles.build(),
+  ]);
 
-  return allRaffle;
+  return { meta, data };
 };
 
 // Raffle Status Change
@@ -156,7 +165,9 @@ const dashboard = async (user: JwtPayload) => {
   const successRaffles = await Raffle.countDocuments({ draw: 'success' });
   // 📊 Calculate success percentage
   const SuccessDraw =
-    totalRaffles > 0 ? ((successRaffles / totalRaffles) * 100).toFixed(2)+"%" : 0;
+    totalRaffles > 0
+      ? ((successRaffles / totalRaffles) * 100).toFixed(2) + '%'
+      : 0;
 
   const totalCollection = charities.reduce((sum, item) => {
     return sum + (item.Totalcollection || 0);
@@ -175,7 +186,7 @@ export const actionService = {
   statusChange,
   getAllCharitits,
   charitistStatus,
-  allUserUnderCharity,
+  getAllRafflesFromDB,
   RaffleStatusChange,
   dashboard,
 };

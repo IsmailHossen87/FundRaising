@@ -32,6 +32,38 @@ export class QueryBuilder<T> {
     return this;
   }
 
+  // 📅 Date Range (weekly, monthly, yearly)
+dateRange(): this {
+  const now = new Date();
+  const range = this.query.dateRange;
+
+  if (range) {
+    let startDate: Date | null = null;
+
+    if (range === "weekly") {
+      startDate = new Date();
+      startDate.setDate(now.getDate() - 7);
+    } else if (range === "monthly") {
+      startDate = new Date();
+      startDate.setMonth(now.getMonth() - 1);
+    } else if (range === "yearly") {
+      startDate = new Date();
+      startDate.setFullYear(now.getFullYear() - 1);
+    }
+
+    if (startDate) {
+      const dateCondition = { createdAt: { $gte: startDate, $lte: now } };
+
+      this.modelQuery = this.modelQuery.find({
+        ...((this.modelQuery as any)._conditions || {}),
+        ...dateCondition,
+      } as FilterQuery<T>);
+    }
+  }
+
+  return this;
+}
+
   // 🔃 Sort
   sort(): this {
     const sort = this.query.sort || "-createdAt";
@@ -61,7 +93,7 @@ export class QueryBuilder<T> {
     return await this.modelQuery.exec();
   }
 
-  // 📊 Get meta info
+  // 📊 Meta info (for pagination)
   async getMeta() {
     const totalDocuments = await this.modelQuery.model.countDocuments();
     const page = Number(this.query.page) || 1;

@@ -6,6 +6,7 @@ export default {
   // ip_address: process.env.IP_ADDRESS,
   database_url: process.env.DATABASE_URL,
   PORT:process.env.PORT,
+  ip_address :process.env.IP_ADDRESS,
   node_env: process.env.NODE_ENV,
   IMAGE_URL: process.env.IMAGE_URL,
   port: process.env.PORT,

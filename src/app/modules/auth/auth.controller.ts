@@ -62,12 +62,17 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 const changePassword = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
   const { ...passwordData } = req.body;
-  await AuthService.changePasswordToDB(user as JwtPayload, passwordData);
+
+  const result = await AuthService.changePasswordToDB(user as JwtPayload, passwordData);
 
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Your password has been successfully changed',
+    data: {
+      createdAt: result?.createdAt,
+      updatedAt: result?.updatedAt,
+    },
   });
 });
 

@@ -8,9 +8,9 @@ import mongoose from 'mongoose';
 
 // CREATECAUSE
 const createCause = async (req: Request, res: Response) => {
-  const userId = req.user.id;
+  const userId = req?.user?.id ;
   req.body.userId = userId; 
-  console.log(req.body);
+
 
   if (req.body.data) {
     const parsedData = JSON.parse(req.body.data);
@@ -55,7 +55,7 @@ const getAllCauses = async (req: Request, res: Response) => {
   });
 };
 const getCharitiesByUser = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user.id;
+  const userId = req?.user?.id ;
 
   const charities = await Charities.find({userId:new mongoose.Types.ObjectId(userId)});
 

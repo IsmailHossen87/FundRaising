@@ -17,6 +17,7 @@ import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
 import { redisClient } from '../../../config/radisConfig';
+import { IUser } from '../user/user.interface';
 
 
 const OTP_EXPIRATION = 5 * 60; // 5 minutes
@@ -203,45 +204,37 @@ const resetPasswordToDB = async (
 const changePasswordToDB = async (
   user: JwtPayload,
   payload: IChangePassword
-) => {
+): Promise<IUser | null> => {
   const { currentPassword, newPassword, confirmPassword } = payload;
   const isExistUser = await User.findById(user.id).select('+password');
+
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
 
-  const isMatch = await User.isMatchPassword(
-    currentPassword,
-    isExistUser.password
-  );
+  const isMatch = await User.isMatchPassword(currentPassword, isExistUser.password);
   if (!isMatch) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Password is incorrect.');
   }
 
   if (currentPassword === newPassword) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      'Please choose a different password.'
-    );
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Please choose a different password.');
   }
 
   if (newPassword !== confirmPassword) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      "Password and Confirm password don't match."
-    );
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Password and Confirm password don't match.");
   }
 
-  const hashPassword = await bcrypt.hash(
-    newPassword,
-    Number(config.bcrypt_salt_rounds)
-  );
+  const hashPassword = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
 
-  await User.findOneAndUpdate(
+  // return updated user
+  const updatedUser = await User.findOneAndUpdate(
     { _id: user.id },
     { password: hashPassword },
     { new: true }
   );
+
+  return updatedUser; // ✅ এখন TypeScript জানবে যে এটা IUser | null
 };
 
 
