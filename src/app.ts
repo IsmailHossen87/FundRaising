@@ -10,6 +10,7 @@ import expressSession from 'express-session';
 import { Morgan } from './shared/morgen';
 
 const app = express();
+
 app.use(passport.initialize());
 app.use(
   expressSession({

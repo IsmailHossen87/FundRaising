@@ -8,7 +8,7 @@ import { emailTemplate } from '../../../../shared/emailTemplate';
 import { emailHelper } from '../../../../helpers/emailHelper';
 import { User } from '../../user/user.model';
 import { QueryBuilder } from '../../../../util/QueryBuilder';
-import { RaffleSeacrchFields } from './RaffleConstant';
+import { excludeField } from '../../../../util/Constants';
 
 // Create raffle
 const createRaffleToDB = async (payload: IRaffle) => {
@@ -31,7 +31,7 @@ const getAllRafflesFromDB = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Raffle.find(), query);
 
   const allRaffles = queryBuilder
-    .search(RaffleSeacrchFields)
+    .search([])
     .filter()
     .sort()
     .fields()
@@ -68,7 +68,7 @@ const getMyRaffle = async (id: string, query: Record<string, any>) => {
 
   // Apply query builder utilities (search, filter, sort, etc.)
   const queryBuilder = new QueryBuilder(raffleQuery, query)
-    .search(RaffleSeacrchFields)
+    .search(excludeField)
     .filter()
     .sort()
     .fields()

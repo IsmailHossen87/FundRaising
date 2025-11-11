@@ -2,8 +2,8 @@ import { Model, Types } from 'mongoose';
 import { USER_ROLES } from '../../../enums/user';
 
 export interface IAuthProvider {
-    provider:"google" | "credentials",
-    providerId:string
+  provider: 'google' | 'credentials';
+  providerId: string;
 }
 
 export type IUser = {
@@ -26,7 +26,7 @@ export type IUser = {
   // for raffle
   ticket?: number;
   raffleId: Types.ObjectId[];
-  auths:IAuthProvider[];
+  auths: IAuthProvider[];
   totalAmount: Number;
 
   address?: {
@@ -49,6 +49,8 @@ export type IUser = {
   };
   paymentIntentId: String;
   stripeSessionId: String;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export type UserModal = {
