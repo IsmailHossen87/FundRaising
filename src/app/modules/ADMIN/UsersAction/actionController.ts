@@ -86,7 +86,7 @@ const RaffleStatusChange = catchAsync(
     });
   }
 );
-//Raffle Status Change
+//DashBoard
 const dashboard = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
   
@@ -96,7 +96,7 @@ const dashboard = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      message: 'Raffle Status Change successfully',
+      message: 'All Data retrived Successfully',
       data: result,
     });
   }

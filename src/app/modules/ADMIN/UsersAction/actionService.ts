@@ -9,7 +9,6 @@ import { Dooner } from '../../ORGANIZER/Charities/Donner.model';
 import { QueryBuilder } from '../../../../util/QueryBuilder';
 import { excludeField } from '../../../../util/Constants';
 
-
 const getAllCharitits = async (user: JwtPayload) => {
   if (USER_ROLES.ADMIN !== user.role) {
     throw new ApiError(
@@ -156,22 +155,69 @@ const dashboard = async (user: JwtPayload) => {
     throw new ApiError(StatusCodes.FORBIDDEN, 'Only admin can view dashboard');
   }
 
-  // 🎟️ Total active raffles
   const raffleCount = await Raffle.countDocuments({ status: 'active' });
   const donorCount = await Dooner.countDocuments();
-  const charities = await Charities.find();
+
+  // Fetch all charities with only causeName and Totalcollection, sorted by Totalcollection descending
+  const charities = await Charities.find()
+    .select('causeName Totalcollection -_id') // only select causeName and Totalcollection, remove _id
+    .sort({ Totalcollection: -1 });
 
   const totalRaffles = await Raffle.countDocuments();
   const successRaffles = await Raffle.countDocuments({ draw: 'success' });
+
   // 📊 Calculate success percentage
   const SuccessDraw =
     totalRaffles > 0
       ? ((successRaffles / totalRaffles) * 100).toFixed(2) + '%'
       : 0;
 
+  // 💰 Total collection from all charities
   const totalCollection = charities.reduce((sum, item) => {
     return sum + (item.Totalcollection || 0);
   }, 0);
+
+  // 🗓️ Monthly donor contribution chart data
+  const monthlyDonations = await Dooner.aggregate([
+    {
+      $group: {
+        _id: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' },
+        },
+        Amount: { $sum: '$totalAmount' },
+      },
+    },
+    { $sort: { '_id.year': 1, '_id.month': 1 } },
+  ]);
+
+  // 🧑‍💻 Monthly user registration data
+  const monthlyUsers = await User.aggregate([
+    {
+      $group: {
+        _id: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' },
+        },
+        totalUsers: { $sum: 1 },
+      },
+    },
+    { $sort: { '_id.year': 1, '_id.month': 1 } },
+  ]);
+
+  // ✅ Format month names for frontend chart
+  const formatMonth = (num: number) =>
+    new Date(0, num - 1).toLocaleString('default', { month: 'short' });
+
+  const donorChart = monthlyDonations.map(d => ({
+    month: `${formatMonth(d._id.month)} ${d._id.year}`,
+    Amount: d.Amount,
+  }));
+
+  const userChart = monthlyUsers.map(u => ({
+    month: `${formatMonth(u._id.month)} ${u._id.year}`,
+    totalUsers: u.totalUsers,
+  }));
 
   // ✅ Return everything together
   return {
@@ -179,14 +225,17 @@ const dashboard = async (user: JwtPayload) => {
     donorCount,
     SuccessDraw,
     totalCollection,
+    charities, // only causeName & Totalcollection
+    donorChart,
+    userChart,
   };
 };
 
 export const actionService = {
   statusChange,
   getAllCharitits,
-  charitistStatus,
   getAllRafflesFromDB,
   RaffleStatusChange,
   dashboard,
+  charitistStatus,
 };
