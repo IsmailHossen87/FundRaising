@@ -6,21 +6,24 @@ import Notification from './notification.model';
 import { JwtPayload } from 'jsonwebtoken';
 import { QueryBuilder } from '../../../../util/QueryBuilder';
 import { excludeField } from '../../../../util/Constants';
-import Raffle from '../../ORGANIZER/raffel/raffel.model';
+import Raffle, { Allticket } from '../../ORGANIZER/raffel/raffel.model';
 import { User } from '../../user/user.model';
 import { Types } from 'mongoose';
 import { emailHelper } from '../../../../helpers/emailHelper';
-import { notificationEmailTemplates } from '../../../../shared/emailTemplate';
+import { notificationEmailTemplates } from '../../../../shared/NotificationTemplate';
 
 const createNotification = async (payload: INotification) => {
-  const { userId, title, isDraft, DeliveryMethod, recipientType, message } = payload;
+  const { userId, title, isDraft, DeliveryMethod, recipientType, message } =
+    payload;
 
+  // 🟢 1️⃣ Draft হলে, update করো
   if (isDraft) {
     let notification = await Notification.findOne({
       userId,
       title,
       isDraft: true,
     });
+
     if (notification) {
       notification = await Notification.findByIdAndUpdate(
         notification._id,
@@ -31,46 +34,84 @@ const createNotification = async (payload: INotification) => {
     }
   }
 
-  // 2️⃣ Create Notification
+  // 🟢 2️⃣ Create Notification
   const result = await Notification.create(payload);
   if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create notification!');
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Failed to create notification!'
+    );
   }
 
-if (DeliveryMethod === "email") {
-  
-  const raffles = await Raffle.find({
-    status: recipientType,
-    ticketBuyers: { $exists: true, $not: { $size: 0 } }
-  });
+  // 🟢 3️⃣ Receiver data বের করো
+  let users: any[] = [];
 
-  const userIds = raffles.flatMap(r => r.ticketBuyers) as Types.ObjectId[];
-  const uniqueUserIds = [...new Set(userIds.map(id => id.toString()))];
+  if (recipientType === 'Winner') {
+    // 🏆 Winner case: AllTickets থেকে winner খুঁজবে
+    const winnerTickets = await Allticket.find({ isWinner: true }).select(
+      'userId raffleId uniqueCode'
+    );
 
-  const users = await User.find({ _id: { $in: uniqueUserIds } }).select('name email');
+    const userIds = winnerTickets.map(t => t.userId.toString());
+    const uniqueUserIds = [...new Set(userIds)]; //winner সকল USER কে Store করতেছি
 
-  for (const user of users) {
-    const emailData = notificationEmailTemplates.genericNotification(user.name, message);
-    emailData.to = user.email;
-    await emailHelper.sendEmail(emailData);
+    users = await User.find({ _id: { $in: uniqueUserIds } }).select( 'name email');
+
+    // message handle (email or socket)
+    for (const user of users) {
+      if (DeliveryMethod === 'email') {
+        const emailData = notificationEmailTemplates.raffleWinner({
+          name: user.name,
+          raffleName: 'Raffle Name',
+          message: message,
+        });
+        emailData.to = user.email;
+        await emailHelper.sendEmail(emailData);
+      } else {
+        // 🔔 (socket.io)
+        const notificationData = {type: 'Winner',title, message: message,date: new Date()};
+        //@ts-ignore
+        global.io?.to(user._id.toString()).emit('NEW_NOTIFICATION', notificationData);
+      }
+    }
+  } else {
+    // 🟠 Active / Closed case: Raffle থেকে buyer list
+    const raffles = await Raffle.find({status: recipientType,ticketBuyers: { $exists: true, $not: { $size: 0 } }});
+
+    const userIds = raffles.flatMap(r => r.ticketBuyers) as Types.ObjectId[];
+    const uniqueUserIds = [...new Set(userIds.map(id => id.toString()))];
+
+    users = await User.find({ _id: { $in: uniqueUserIds } }).select(
+      'name email'
+    );
+
+    for (const user of users) {
+      if (DeliveryMethod === 'email') {
+        // ✉️ Email পাঠাও
+        const emailData = notificationEmailTemplates.genericNotification(
+          user.name,
+          message
+        );
+        emailData.to = user.email;
+        await emailHelper.sendEmail(emailData);
+      } else {
+        // 🔔 Real-time notification পাঠাও (socket.io)
+        const notificationData = {type: recipientType,title,message, date: new Date(), };
+        //@ts-ignore
+        global.io ?.to(user._id.toString()).emit('NEW_NOTIFICATION', notificationData);
+      }
+    }
   }
-}
-
-  //@ts-ignore
-  const io = global.io;
-  await io?.emit(`NEW_NOTIFICATION`, result);
 
   return result;
 };
-
-
 const updateNotification = async (
   notificationId: string,
   user: JwtPayload,
   payload: INotification
 ) => {
   const notification = await Notification.findOne({
-    _id: notificationId
+    _id: notificationId,
   });
   if (!notification) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Notification not found!');
