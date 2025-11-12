@@ -158,7 +158,6 @@ const dashboard = async (user: JwtPayload) => {
   const raffleCount = await Raffle.countDocuments({ status: 'active' });
   const donorCount = await Dooner.countDocuments();
 
-  // Fetch all charities with only causeName and Totalcollection, sorted by Totalcollection descending
   const charities = await Charities.find()
     .select('causeName Totalcollection -_id') // only select causeName and Totalcollection, remove _id
     .sort({ Totalcollection: -1 });
@@ -178,7 +177,7 @@ const dashboard = async (user: JwtPayload) => {
   }, 0);
 
   // 🗓️ Monthly donor contribution chart data
-  const monthlyDonations = await Dooner.aggregate([
+  const monthlyDonation = await Dooner.aggregate([
     {
       $group: {
         _id: {
@@ -189,10 +188,15 @@ const dashboard = async (user: JwtPayload) => {
       },
     },
     { $sort: { '_id.year': 1, '_id.month': 1 } },
-  ]);
+  ]); 
+    const monthlyDonations = monthlyDonation.map(d => ({
+    year: d._id.year,
+    month: d._id.month,
+    Amount: d.Amount,
+  }));
 
   // 🧑‍💻 Monthly user registration data
-  const monthlyUsers = await User.aggregate([
+  const monthlyUsersAgg = await User.aggregate([
     {
       $group: {
         _id: {
@@ -203,19 +207,10 @@ const dashboard = async (user: JwtPayload) => {
       },
     },
     { $sort: { '_id.year': 1, '_id.month': 1 } },
-  ]);
-
-  // ✅ Format month names for frontend chart
-  const formatMonth = (num: number) =>
-    new Date(0, num - 1).toLocaleString('default', { month: 'short' });
-
-  const donorChart = monthlyDonations.map(d => ({
-    month: `${formatMonth(d._id.month)} ${d._id.year}`,
-    Amount: d.Amount,
-  }));
-
-  const userChart = monthlyUsers.map(u => ({
-    month: `${formatMonth(u._id.month)} ${u._id.year}`,
+  ]); 
+    const monthlyUsers = monthlyUsersAgg.map(u => ({
+    year: u._id.year,
+    month: u._id.month,
     totalUsers: u.totalUsers,
   }));
 
@@ -225,9 +220,9 @@ const dashboard = async (user: JwtPayload) => {
     donorCount,
     SuccessDraw,
     totalCollection,
-    charities, // only causeName & Totalcollection
-    donorChart,
-    userChart,
+    charities, 
+    monthlyDonations,
+    monthlyUsers,
   };
 };
 

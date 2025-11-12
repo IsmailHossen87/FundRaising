@@ -1,27 +1,29 @@
 import { z } from 'zod';
 
-export const NotificationValidation = {
-  createNotificationSchema: z.object({
-    type: z.string().nonempty(),
-    title: z.string().nonempty(),
-    recipientGroup: z.string().nonempty(),
-    dateSent: z
-      .string()
-      .transform((val) => new Date(val))
-      .optional(),
-    status: z.enum(['Sent', 'Draft']),
-    recipientType: z.enum(['Active', 'Closed', 'Winner Announced']),
+// 🌱 Draft Notification Schema (all optional except isDraft)
+export const DraftNotificationZodSchema = z.object({
+  body: z.object({
+    title: z.string(),
+    isDraft: z.boolean().optional(),
+    DeliveryMethod: z.enum(['email', 'notification']).optional(),
+    recipientType: z.enum(['active', 'closed', 'Winner ']).optional(),
+    message: z.string().optional(),
   }),
+});
 
-  updateNotificationSchema: z.object({
-    type: z.string().optional(),
-    title: z.string().optional(),
-    recipientGroup: z.string().optional(),
-    dateSent: z
-      .string()
-      .transform((val) => new Date(val))
-      .optional(),
-    status: z.enum(['Sent', 'Draft']).optional(),
-    recipientType: z.enum(['Active', 'Closed', 'Winner Announced']).optional(),
+// 🌟 Full Notification Schema (required fields)
+export const FullNotificationZodSchema = z.object({
+  body: z.object({
+    title: z.string({ required_error: 'Title is required' }),
+    isDraft: z.boolean().optional(),
+    DeliveryMethod: z.enum(['email', 'notification']),
+    recipientType: z.enum(['active', 'closed', 'Winner']),
+    message: z.string({ required_error: 'Message is required' }),
   }),
+});
+
+// ✅ Export together
+export const NotificationValidation = {
+  DraftNotificationZodSchema,
+  FullNotificationZodSchema,
 };
