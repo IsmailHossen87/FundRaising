@@ -159,7 +159,7 @@ const dashboard = async (user: JwtPayload) => {
   const donorCount = await Dooner.countDocuments();
 
   const charities = await Charities.find()
-    .select('causeName Totalcollection -_id') // only select causeName and Totalcollection, remove _id
+    .select('causeName Totalcollection -_id') 
     .sort({ Totalcollection: -1 });
 
   const totalRaffles = await Raffle.countDocuments();
