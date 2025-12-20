@@ -5,15 +5,16 @@ import stripe from '../../config/stripe.config';
 import { logger } from '../../../shared/logger';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
+import { User } from '../user/user.model';
 import { handlePayment } from '../../../handlers/handlePaymentSuccess';
+
 
 const webhookHandler = async (req: Request, res: Response): Promise<void> => {
   const sig = req.headers['stripe-signature'];
   const webhookSecret = config.stripe.stripe_webhook_secret;
 
   if (!webhookSecret) {
-    console.error('Stripe webhook secret not set');
-    res.status(500).send('Webhook secret not configured');
+    res.status(500).send('Stripe webhook secret not configured');
     return;
   }
 
@@ -26,60 +27,99 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
       webhookSecret
     );
   } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message);
+    logger.error('Webhook signature verification failed', err.message);
     res.status(400).send(`Webhook Error: ${err.message}`);
     return;
   }
 
-  // Check if the event is valid
-  if (!event) {
-    logger.error('Invalid event received - event object is null or undefined');
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid event received!');
-  }
-
-  console.log('event.type', event.type);
   try {
     switch (event.type) {
+      // ======================================
+      // ✅ CHECKOUT PAYMENT COMPLETED
+      // ======================================
       case 'checkout.session.completed': {
-        const session = event.data.object as any;
-
+        const session = event.data.object as Stripe.Checkout.Session;
         const metadata = session.metadata || {};
 
-        //  Raffle Payment
+        // 🔑 Get PaymentIntent
+        const paymentIntentId = session.payment_intent;
+
+        if (!paymentIntentId) {
+          throw new ApiError(
+            StatusCodes.BAD_REQUEST,
+            'PaymentIntent not found in checkout session'
+          );
+        }
+
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+          paymentIntentId as string
+        );
+
+        // ✅ Ensure payment success
+        if (paymentIntent.status !== 'succeeded') {
+          logger.warn(
+            `Payment not successful. Status: ${paymentIntent.status}`
+          );
+          break;
+        }
+
+        console.log("session", session)
+
+        console.log("metadata", metadata)
+
+
         if ((metadata.raffleId && metadata.userId)) {
           await handlePayment.handleRaffleBuy(session);
           //  Charity Donation
         } else if ((metadata.type === 'charity')) {
           await handlePayment.handleDonate(session);
         } else {
-          console.log('⚠️ Unknown payment type received in webhook');
+          logger.warn('Unknown payment type received in webhook metadata');
         }
+
         break;
       }
 
+      // ======================================
+      // 💸 STRIPE TRANSFER CREATED
+      // ======================================
       case 'transfer.created':
-        await handleTransferCreated(event.data.object);
+        logger.info('Transfer created', event.data.object);
         break;
 
+      // ======================================
+      // 🏦 CONNECTED ACCOUNT UPDATED
+      // ======================================
+      case 'account.updated': {
+        const account = event.data.object as Stripe.Account;
+
+        if (!account.email) break;
+
+        const loginLink = await stripe.accounts.createLoginLink(account.id);
+
+        await User.updateOne(
+          { email: account.email },
+          {
+            $set: {
+              'stripeAccountInfo.loginUrl': loginLink.url,
+              'stripeAccountInfo.stripeAccountStatus': 'active',
+            },
+          }
+        );
+
+        break;
+      }
+
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        logger.info(`Unhandled event type: ${event.type}`);
         break;
     }
 
     res.status(200).json({ received: true });
   } catch (err: any) {
-    console.error('Error handling the event:', err);
-    res.status(500).send(`Internal Server Error: ${err.message}`);
+    logger.error('Webhook processing error', err);
+    res.status(500).send(`Webhook Error: ${err.message}`);
   }
 };
 
 export default webhookHandler;
-
-// handleTransferCreated
-const handleTransferCreated = async (transfer: Stripe.Transfer) => {
-  try {
-    console.log(`Transfer for user ${transfer.destination} created`);
-  } catch (error) {
-    console.error('Error in handleTransferCreated:', error);
-  }
-};

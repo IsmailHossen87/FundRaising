@@ -50,7 +50,19 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     stripeAccountInfo: {
       stripeCustomerId: {
+        type: String
+      },
+      stripeAccountId: {
         type: String,
+        default: '',
+      },
+      stripeAccountStatus: {
+        type: String,
+        enum: ['pending', 'active', 'restricted'],
+        default: 'pending',
+      },
+      stripeConnectedAccount: {
+        type: Object,
         required: false,
       },
       loginUrl: {

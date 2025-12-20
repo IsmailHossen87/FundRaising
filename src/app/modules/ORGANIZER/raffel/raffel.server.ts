@@ -22,7 +22,13 @@ const createRaffleToDB = async (payload: IRaffle) => {
   if (isExist) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Raffle name already exists');
   }
-
+  const user = await User.findById(payload.userId);
+  if (!user) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'User not found');
+  }
+  if (!user.stripeAccountInfo?.stripeConnectedAccount) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'User does not have a connected Stripe account');
+  }
   const result = await Raffle.create(payload);
   return result;
 };

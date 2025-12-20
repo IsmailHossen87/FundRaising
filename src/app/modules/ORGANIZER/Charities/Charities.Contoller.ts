@@ -8,8 +8,8 @@ import mongoose from 'mongoose';
 
 // CREATECAUSE
 const createCause = async (req: Request, res: Response) => {
-  const userId = req?.user?.id ;
-  req.body.userId = userId; 
+  const userId = req?.user?.id;
+  req.body.userId = userId;
 
 
   if (req.body.data) {
@@ -21,7 +21,7 @@ const createCause = async (req: Request, res: Response) => {
     req.body.coverImage = `/image/${req.files.image[0].filename}`;
   }
 
-  const data = { ...req.body }; 
+  const data = { ...req.body };
   console.log(data);
 
   const result = await charitiesService.createCause(data);
@@ -32,8 +32,8 @@ const createCause = async (req: Request, res: Response) => {
   });
 };
 // FOR CROWFOUNDER
-const createCrowdfunder = async (req: Request, res: Response) => { 
-  const userId = req.user.id;
+const createCrowdfunder = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
   if (req.files && 'image' in req.files && req.files.image[0]) {
     req.body.image = `${process.env.IMAGE_URL}/image/${req.files.image[0].filename}`;
   }
@@ -55,9 +55,9 @@ const getAllCauses = async (req: Request, res: Response) => {
   });
 };
 const getCharitiesByUser = catchAsync(async (req: Request, res: Response) => {
-  const userId = req?.user?.id ;
+  const userId = req?.user?.id;
 
-  const charities = await Charities.find({userId:new mongoose.Types.ObjectId(userId)});
+  const charities = await Charities.find({ userId: new mongoose.Types.ObjectId(userId) });
 
   sendResponse(res, {
     success: true,

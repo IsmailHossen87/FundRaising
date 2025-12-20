@@ -5,10 +5,11 @@ dotenv.config({ path: path.join(process.cwd(), '.env') });
 export default {
   // ip_address: process.env.IP_ADDRESS,
   database_url: process.env.DATABASE_URL,
-  PORT:process.env.PORT,
-  ip_address :process.env.IP_ADDRESS,
+  PORT: process.env.PORT,
+  ip_address: process.env.IP_ADDRESS,
   node_env: process.env.NODE_ENV,
   IMAGE_URL: process.env.IMAGE_URL,
+  BACKEND_URL: process.env.BACKEND_URL,
   port: process.env.PORT,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
   jwt: {
@@ -18,7 +19,7 @@ export default {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
-  FRONTEND_URL:process.env.FRONTEND_URL,
+  FRONTEND_URL: process.env.FRONTEND_URL,
   email: {
     from: process.env.EMAIL_FROM,
     user: process.env.EMAIL_USER,

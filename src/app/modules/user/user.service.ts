@@ -49,14 +49,16 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
     );
   }
 
-  await User.findOneAndUpdate(
-    {_id:createUser._id},
+  await User.findByIdAndUpdate(
+    createUser._id,
     {
-      $set:{
-        stripeAccountInfo:{stripeCustomerId:stripeCustomer.id}
-      }
-    }
-  )
+      $set: {
+        'stripeAccountInfo.stripeCustomerId': stripeCustomer.id,
+      },
+    },
+    { new: true }
+  );
+
 
   return createUser;
 };
@@ -84,18 +86,18 @@ const getAllUser = async () => {
 // Count
 const allUserCount = async () => {
   const allUser = await User.countDocuments();
-  const charities = await Charities.countDocuments({type:"Charity"});
+  const charities = await Charities.countDocuments({ type: "Charity" });
   const fundRaiser = await Funding.countDocuments();
-  const cownFounder = await Charities.countDocuments({type:"cowdFounder"});
+  const cownFounder = await Charities.countDocuments({ type: "cowdFounder" });
   const donner = await Charities.countDocuments();
 
 
- return {
+  return {
     meta: {
-      allUser:allUser,
-      charities:charities,
-      fundRaiser:fundRaiser,
-      cownFounder:cownFounder
+      allUser: allUser,
+      charities: charities,
+      fundRaiser: fundRaiser,
+      cownFounder: cownFounder
     },
   };
 };

@@ -6,7 +6,7 @@ import sendResponse from '../../../../shared/sendResponse';
 import ApiError from '../../../../errors/ApiError';
 
 const createRaffle = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user.id;
+  const userId = req.user?.id;
 
   // handle image upload
   if (req.files && 'image' in req.files && req.files.image[0]) {
@@ -35,8 +35,8 @@ const getAllRaffles = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: "Raffles fetched successfully",
-    data: result.data, 
-    meta: result.meta, 
+    data: result.data,
+    meta: result.meta,
   });
 });
 
@@ -55,9 +55,9 @@ const getRaffleById = catchAsync(async (req: Request, res: Response) => {
 
 // Get my raffle
 const getMyRaffle = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user.id;
-  const query = req.query 
-  const result = await RaffleService.getMyRaffle(userId ,query as Record<string,string>);
+  const userId = req.user?.id as string;
+  const query = req.query
+  const result = await RaffleService.getMyRaffle(userId, query as Record<string, string>);
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -116,7 +116,7 @@ const getRandomWinnerMultiple = catchAsync(
   async (req: Request, res: Response) => {
     const raffleId = req.params.id;
     const totalWinner = req.body.totalWinner
- 
+
     const winner = await RaffleService.getRandomWinner(raffleId, Number(totalWinner));
 
     sendResponse(res, {

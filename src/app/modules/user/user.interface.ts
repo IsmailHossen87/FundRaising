@@ -37,7 +37,9 @@ export type IUser = {
   };
   // StripeAccountInfo
   stripeAccountInfo?: {
-    stripeCustomerId?: string;
+    stripeAccountId?: string;
+    stripeAccountStatus?: 'pending' | 'active' | 'restricted';
+    stripeConnectedAccount: String,
     loginUrl?: string;
   } | null;
   location?: string;

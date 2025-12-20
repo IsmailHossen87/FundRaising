@@ -51,7 +51,7 @@ router.get(
 
 // 💳 Create Payment Intent for Raffle
 router.post(
-  '/paymentIntent/:id',auth(USER_ROLES.USER),
+  '/payment-intent/:id', auth(USER_ROLES.USER),
   PaymentController.createPaymentIntentRaffle
 );
 

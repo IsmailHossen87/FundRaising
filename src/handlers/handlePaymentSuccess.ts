@@ -13,6 +13,7 @@ import { emailTemplate } from '../shared/emailTemplate';
 import { emailHelper } from '../helpers/emailHelper';
 import mongoose from 'mongoose';
 import { User } from '../app/modules/user/user.model';
+import { TransactionHistories } from '../app/modules/TransactionHistory/transaction.model';
 
 const paymentSuccess = (req: Request, res: Response) => {
   res.status(200).json({
@@ -42,7 +43,10 @@ const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
     const { raffleId, ticketCount, userId, totalAmount, message }: any =
       session.metadata;
 
-    const raffle = await Raffle.findById(raffleId);
+    console.log("session------------metadata", session.metadata)
+
+    const raffle = await Raffle.findById(raffleId).populate('causeId', "userId")
+    console.log(raffle);
     const user = await User.findById(userId);
 
     if (!raffle) throw new ApiError(StatusCodes.NOT_FOUND, 'Raffle not found!');
@@ -54,7 +58,7 @@ const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
     // 🎯 Update raffle info
     await Raffle.findByIdAndUpdate(raffleId, {
       $inc: { sold: ticket, amount: TotalAmount },
-      $addToSet: { ticketBuyers: user._id ,buyerMessage:message },
+      $addToSet: { ticketBuyers: user._id, buyerMessage: message },
     });
     await User.findByIdAndUpdate(userId, {
       $inc: { ticket: ticket, totalAmount: TotalAmount },
@@ -84,8 +88,27 @@ const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
       ticketCodes: generatedTickets,
     };
 
+    const charityOwnerAmount = (TotalAmount * 60) / 100;
+    const platformAdminAmount = (TotalAmount * 10) / 100;
+    const raffleCreatorAmount = (TotalAmount * 30) / 100;
+
     const CongratulationEmail = emailTemplate.raffleConfirmation(value);
     await emailHelper.sendEmail(CongratulationEmail);
+    await TransactionHistories.create({
+      charityId: raffle.causeId,
+      charityUserId: (raffle?.causeId as any)?.userId,
+      buyerId: user._id,
+      raffleId: raffle._id,
+      totalPaidAmount: TotalAmount,
+      charityOwnerAmount,
+      platformAdminAmount,
+      raffleCreatorAmount,
+      platformFee: 10,
+      paymentMethod: 'stripe',
+      paymentStatus: 'completed',
+      transactionId: session.id,
+      totalTicket: ticket,
+    });
 
     console.log("✅ Raffle updated successfully for signed-up user!");
   } catch (error) {

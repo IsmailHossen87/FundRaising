@@ -8,6 +8,7 @@ import { CharitiesRoutes } from '../app/modules/ORGANIZER/Charities/Charities.Ro
 import { fundRiaseRouter } from '../app/modules/user/FundRaise/FundRaiseRoute';
 import { PaymentRouter } from '../app/modules/Payment/Payment.route';
 import { SettingRouter } from '../app/modules/Setting/SettingRouter';
+import stripeAccountRoutes from '../app/modules/stripeAccount/stripeAccount.route';
 
 const router = express.Router();
 
@@ -38,16 +39,20 @@ const apiRoutes = [
   },
   {
     path: '/fundraise',
-    route:fundRiaseRouter ,
+    route: fundRiaseRouter,
   },
   {
     path: '/payment',
-    route:PaymentRouter ,
+    route: PaymentRouter,
   },
   {
     path: '/settings',
-    route:SettingRouter ,
+    route: SettingRouter,
   },
+  {
+    path: '/stripe',
+    route: stripeAccountRoutes,
+  }
 ];
 
 apiRoutes.forEach(route => router.use(route.path, route.route));

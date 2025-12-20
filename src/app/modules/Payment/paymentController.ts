@@ -27,7 +27,7 @@ const createPaymentIntentRaffle = catchAsync(
     const paymentSession = await createRafflePaymentIntent(
       raffleId,
       ticketCount,
-      { userId: req.user.id,message }
+      { userId: req.user?.id, message }
     );
 
     sendResponse(res, {
