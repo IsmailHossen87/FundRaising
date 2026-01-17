@@ -1,33 +1,17 @@
 import { z } from 'zod';
 
-// Create Raffle Validation
-export const createRaffleZodSchema = z.object({
-  body: z.object({
-    raffleName: z.string({ required_error: 'Raffle name is required' }),
-    organizer: z.object({
-      name: z.string({ required_error: 'Organizer name is required' }),
-      email: z.string().email({ message: 'Invalid email format' }),
-      phoneNumber: z.string({
-        required_error: 'Organizer phone number is required',
-      }),
-    }),
-    ticketAmount: z
-      .number()
-      .min(1, { message: 'Target amount must be greater than 0' }),
-    causeId: z.string({ required_error: 'Cause is required' }),
-    ticketSaleEndDate: z.coerce.date(),
-    drawDate: z.coerce.date(),
-    status: z.enum(['active', 'closed']).default('active'),
-    raffleDescription: z.string().optional(),
-    prizes: z.string({ required_error: 'Prizes list is required' }),
-    targetsold: z.number().min(0, { message: 'Sold must be 0 or higher' }),
-  }),
-});
-
 // Update Raffle Validation
 export const updateRaffleZodSchema = z.object({
   body: z.object({
     raffleName: z.string().optional(),
+    monthName: z.string().optional(),
+    package: z
+      .object({
+        ticketType: z.enum(['Premium', 'Standard', 'Basic']).optional(),
+        ticketQuantity: z.number().optional(),
+        ticketAmount: z.number().optional(),
+      })
+      .optional(),
     organizer: z
       .object({
         name: z.string().optional(),
@@ -37,6 +21,7 @@ export const updateRaffleZodSchema = z.object({
       .optional(),
     ticketAmount: z.number().min(1).optional(),
     causeId: z.string().optional(),
+    ticketSaleStartDate: z.coerce.date().optional(),
     ticketSaleEndDate: z.coerce.date().optional(),
     drawDate: z.coerce.date().optional(),
     status: z.enum(['active', 'closed']).optional(),

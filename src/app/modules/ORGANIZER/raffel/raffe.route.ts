@@ -8,7 +8,6 @@ import { USER_ROLES } from '../../../../enums/user';
 import { RaffleController } from './raffel.controller';
 import { PaymentController } from '../../Payment/paymentController';
 import {
-  createRaffleZodSchema,
   updateRaffleZodSchema,
 } from './raffel.validation';
 
@@ -25,10 +24,10 @@ router.post(
   auth(...organizerAccess),
   fileUploadHandler(),
   parseFormDataMiddleware,
-  validateRequest(createRaffleZodSchema),
+  validateRequest(updateRaffleZodSchema),
   RaffleController.createRaffle
 );
-
+router.route('/monthly-raffle').post(auth(...adminAccess), validateRequest(updateRaffleZodSchema), RaffleController.monthlyRaffle)
 // 📋 Get All Raffles (Admin only)
 router.get(
   '/',

@@ -3,14 +3,13 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../../shared/catchAsync';
 import { RaffleService } from './raffel.server';
 import sendResponse from '../../../../shared/sendResponse';
-import ApiError from '../../../../errors/ApiError';
 
 const createRaffle = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
   // handle image upload
   if (req.files && 'image' in req.files && req.files.image[0]) {
-    req.body.image = `${process.env.IMAGE_URL}/image/${req.files.image[0].filename}`;
+    req.body.image = `$/image/${req.files.image[0].filename}`;
   }
 
   // attach user ID
@@ -25,6 +24,22 @@ const createRaffle = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+
+const monthlyRaffle = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  req.body.userId = userId;
+
+  const result = await RaffleService.createMonthlyRaffleToDB(req.body);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.CREATED,
+    message: 'Monthly Raffle created successfully',
+    data: result,
+  });
+});
+
 
 // Get all raffles
 const getAllRaffles = catchAsync(async (req: Request, res: Response) => {
@@ -142,6 +157,7 @@ const allWinner = catchAsync(async (req: Request, res: Response) => {
 
 export const RaffleController = {
   createRaffle,
+  monthlyRaffle,
   getAllRaffles,
   getRaffleById,
   updateRaffle,

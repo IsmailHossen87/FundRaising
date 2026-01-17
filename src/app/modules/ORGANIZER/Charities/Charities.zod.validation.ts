@@ -5,7 +5,7 @@ import { z } from 'zod';
 export const createCauseZodSchema = z.object({
   body: z.object({
     causeName: z.string({ required_error: 'Cause name is required' }),
-    type: z.enum(['Charity', 'cowdFounder']),
+    type: z.enum(['Charity', 'crowdfunder']),
     registrationNumber: z.string().optional(),
     category: z.enum(['School', 'Club', 'Charity'], {
       required_error: 'Category is required',
@@ -57,7 +57,7 @@ export const createCrowdfunderZodSchema = z.object({
     // password: z.string().min(6),
     pageTitle: z.string().min(3),
     goalAmount: z.coerce.number().positive(),
-    type: z.enum(['Charity', 'cowdFounder']),
+    type: z.enum(['Charity', 'crowdfunder']),
     beneficiaryFor: z.enum(['self', 'family', 'friend', 'charity', 'other']),
     description: z.string().min(20),
     referralSource: z
@@ -111,7 +111,7 @@ export const updateCrowdfunderZodSchema = z.object({
       ])
       .optional(),
     phoneCountryCode: z.string().min(1).optional(),
-      contractInfo: z.object({
+    contractInfo: z.object({
       ContractName: z.string().min(1).optional(),
       ContractNumber: z.string().optional(),
       ContractEmail: z.string().optional(),

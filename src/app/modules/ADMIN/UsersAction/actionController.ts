@@ -10,13 +10,14 @@ import { JwtPayload } from 'jsonwebtoken';
 const getAllCharitits = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
-    const result = await actionService.getAllCharitits(user as JwtPayload)
+    const query = req.query;
+    const result = await actionService.getAllCharitits(user as JwtPayload, query as Record<string, string>)
 
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: 'Get all Charitist successfully',
-      data: result,
+      data: { ...result },
     });
   }
 );
@@ -25,9 +26,9 @@ const getAllCharitits = catchAsync(
 const statusChange = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
-    const userId = req.params.id 
+    const userId = req.params.id
 
-    const result = await actionService.statusChange(user as JwtPayload,userId)
+    const result = await actionService.statusChange(user as JwtPayload, userId)
 
     sendResponse(res, {
       success: true,
@@ -41,9 +42,9 @@ const statusChange = catchAsync(
 const charitistStatus = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
-    const charitistId = req.params.id 
+    const charitistId = req.params.id
 
-    const result = await actionService.charitistStatus(user as JwtPayload,charitistId)
+    const result = await actionService.charitistStatus(user as JwtPayload, charitistId)
 
     sendResponse(res, {
       success: true,
@@ -59,24 +60,24 @@ const allUserUnderCharity = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
     const query = req.query;
-    const result = await actionService.getAllRafflesFromDB(user as JwtPayload , query as Record<string,string>)
+    const result = await actionService.getAllRafflesFromDB(user as JwtPayload, query as Record<string, string>)
 
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
       message: 'All Raffle retrived successfully',
-      meta:result.meta,
+      meta: result.meta,
       data: result.data,
-      
+
     });
   }
 );
 //Raffle Status Change
 const RaffleStatusChange = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const raffleId = req.params.id  
+    const raffleId = req.params.id
     const user = req.user
-    const result = await actionService.RaffleStatusChange(user as JwtPayload,raffleId)
+    const result = await actionService.RaffleStatusChange(user as JwtPayload, raffleId)
 
     sendResponse(res, {
       success: true,
@@ -89,7 +90,7 @@ const RaffleStatusChange = catchAsync(
 //DashBoard
 const dashboard = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-  
+
     const user = req.user
     const result = await actionService.dashboard(user as JwtPayload)
 
@@ -103,4 +104,4 @@ const dashboard = catchAsync(
 );
 
 
-export const actionController ={statusChange,getAllCharitits,charitistStatus,allUserUnderCharity,RaffleStatusChange,dashboard}
+export const actionController = { statusChange, getAllCharitits, charitistStatus, allUserUnderCharity, RaffleStatusChange, dashboard }

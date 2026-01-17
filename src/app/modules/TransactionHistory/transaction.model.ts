@@ -21,6 +21,7 @@ enum PaymentMethod {
 // Interface for the payment/raffle entry
 interface IRafflePayment {
     _id: ObjectId;
+    type: 'charity' | 'raffle';
     charityId: Types.ObjectId;
     charityUserId: Types.ObjectId;
     buyerId: Types.ObjectId;
@@ -40,6 +41,7 @@ interface IRafflePayment {
 
 const TransactionSchema = new mongoose.Schema<IRafflePayment>({
     charityId: { type: Schema.Types.ObjectId, ref: 'User' },
+    type: { type: String, enum: ['charity', 'raffle'] },
     charityUserId: { type: Schema.Types.ObjectId, ref: 'User' },
     buyerId: { type: Schema.Types.ObjectId, ref: 'User' },
     raffleId: { type: Schema.Types.ObjectId, ref: 'Raffle' },

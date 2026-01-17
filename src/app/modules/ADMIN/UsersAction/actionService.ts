@@ -8,25 +8,36 @@ import Raffle from '../../ORGANIZER/raffel/raffel.model';
 import { Dooner } from '../../ORGANIZER/Charities/Donner.model';
 import { QueryBuilder } from '../../../../util/QueryBuilder';
 import { excludeField } from '../../../../util/Constants';
+import { query } from 'express';
 
 // allCharity
-const getAllCharitits = async (user: JwtPayload) => {
+const getAllCharitits = async (user: JwtPayload, query: Record<string, string>) => {
   if (USER_ROLES.ADMIN !== user.role) {
     throw new ApiError(
       StatusCodes.FORBIDDEN,
       'Only admin can get all Cheritist'
     );
   }
-  const result = await Charities.find().populate({
+
+  const queryBuilder = new QueryBuilder(Charities.find().populate({
     path: 'userId',
     select: 'name email',
-  });
+  }), query);
 
-  if (!result) {
-    throw new ApiError(StatusCodes.NOT_FOUND, 'Cheritist not found');
-  }
+  const allCharities = queryBuilder
+    .search(excludeField)
+    .filter()
+    .dateRange()
+    .sort()
+    .fields()
+    .paginate();
 
-  return result;
+  const [meta, data] = await Promise.all([
+    allCharities.getMeta(),
+    allCharities.build(),
+  ]);
+
+  return { meta, data };
 };
 
 const statusChange = async (authUser: JwtPayload, userId: string) => {

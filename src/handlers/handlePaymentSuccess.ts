@@ -35,18 +35,15 @@ const generateTicketCode = (userId: string, raffleId: string): string => {
   return hash.substring(0, 6).toUpperCase();
 };
 
+
 // RAFFLE
 const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
-  console.log(session.metadata);
 
   try {
     const { raffleId, ticketCount, userId, totalAmount, message }: any =
       session.metadata;
 
-    console.log("session------------metadata", session.metadata)
-
     const raffle = await Raffle.findById(raffleId).populate('causeId', "userId")
-    console.log(raffle);
     const user = await User.findById(userId);
 
     if (!raffle) throw new ApiError(StatusCodes.NOT_FOUND, 'Raffle not found!');

@@ -32,7 +32,7 @@ export interface ICause extends Document {
 
   pageTitle?: string;
   pageSlug?: string;
-  type: 'cowdFounder' | 'Charity';
+  type: 'crowdfunder' | 'Charity';
   goalAmount?: number;
   fundraiserType?: FundraiserType;
   beneficiaryFor?: BeneficiaryFor;

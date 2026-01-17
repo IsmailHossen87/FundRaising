@@ -26,9 +26,28 @@ const createRaffleToDB = async (payload: IRaffle) => {
   if (!user) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'User not found');
   }
-  if (!user.stripeAccountInfo?.stripeConnectedAccount) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'User does not have a connected Stripe account');
+  // if (!user.stripeAccountInfo?.stripeConnectedAccount) {
+  //   throw new ApiError(StatusCodes.BAD_REQUEST, 'User does not have a connected Stripe account');
+  // }
+  const result = await Raffle.create(payload);
+  return result;
+};
+
+
+// Create raffle
+const createMonthlyRaffleToDB = async (payload: IRaffle) => {
+
+  const isExist = await Raffle.findOne({ raffleName: payload.raffleName });
+  if (isExist) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Raffle name already exists');
   }
+  const user = await User.findById(payload.userId);
+  if (!user) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'User not found');
+  }
+  // if (!user.stripeAccountInfo?.stripeConnectedAccount) {
+  //   throw new ApiError(StatusCodes.BAD_REQUEST, 'User does not have a connected Stripe account');
+  // }
   const result = await Raffle.create(payload);
   return result;
 };
@@ -237,6 +256,7 @@ const allWinner = async (id: string) => {
 
 export const RaffleService = {
   createRaffleToDB,
+  createMonthlyRaffleToDB,
   getAllRafflesFromDB,
   getRaffleByIdFromDB,
   updateRaffleInDB,
