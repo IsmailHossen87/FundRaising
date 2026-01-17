@@ -9,6 +9,7 @@ import { Dooner } from '../../ORGANIZER/Charities/Donner.model';
 import { QueryBuilder } from '../../../../util/QueryBuilder';
 import { excludeField } from '../../../../util/Constants';
 
+// allCharity
 const getAllCharitits = async (user: JwtPayload) => {
   if (USER_ROLES.ADMIN !== user.role) {
     throw new ApiError(
@@ -159,7 +160,7 @@ const dashboard = async (user: JwtPayload) => {
   const donorCount = await Dooner.countDocuments();
 
   const charities = await Charities.find()
-    .select('causeName Totalcollection -_id') 
+    .select('causeName Totalcollection -_id')
     .sort({ Totalcollection: -1 });
 
   const totalRaffles = await Raffle.countDocuments();
@@ -188,8 +189,8 @@ const dashboard = async (user: JwtPayload) => {
       },
     },
     { $sort: { '_id.year': 1, '_id.month': 1 } },
-  ]); 
-    const monthlyDonations = monthlyDonation.map(d => ({
+  ]);
+  const monthlyDonations = monthlyDonation.map(d => ({
     year: d._id.year,
     month: d._id.month,
     Amount: d.Amount,
@@ -207,8 +208,8 @@ const dashboard = async (user: JwtPayload) => {
       },
     },
     { $sort: { '_id.year': 1, '_id.month': 1 } },
-  ]); 
-    const monthlyUsers = monthlyUsersAgg.map(u => ({
+  ]);
+  const monthlyUsers = monthlyUsersAgg.map(u => ({
     year: u._id.year,
     month: u._id.month,
     totalUsers: u.totalUsers,
@@ -220,7 +221,7 @@ const dashboard = async (user: JwtPayload) => {
     donorCount,
     SuccessDraw,
     totalCollection,
-    charities, 
+    charities,
     monthlyDonations,
     monthlyUsers,
   };
