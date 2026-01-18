@@ -27,73 +27,36 @@ router.post(
   validateRequest(updateRaffleZodSchema),
   RaffleController.createRaffle
 );
-router.route('/monthly-raffle').post(auth(...adminAccess), validateRequest(updateRaffleZodSchema), RaffleController.monthlyRaffle)
-// 📋 Get All Raffles (Admin only)
-router.get(
-  '/',
-  auth(...adminAccess),
-  RaffleController.getAllRaffles
-);
+router.route('/monthly-raffle')
+  .post(auth(...adminAccess), validateRequest(updateRaffleZodSchema), RaffleController.monthlyRaffle)
+  .get(auth(...adminAccess), RaffleController.allMonthlyRaffle)
+
+router.get('/', auth(...adminAccess), RaffleController.getAllRaffles);
 
 // 📦 Get My Raffles (Organizer)
-router.get(
-  '/myRaffle',
-  auth(USER_ROLES.ORGANIZER),
-  RaffleController.getMyRaffle
-);
+router.get('/myRaffle', auth(USER_ROLES.ORGANIZER), RaffleController.getMyRaffle);
 
-// 👥 Get All Participants
-router.get(
-  '/participant',
-  RaffleController.allParticipant
-);
+router.get('/participant', RaffleController.allParticipant);
 
 // 💳 Create Payment Intent for Raffle
-router.post(
-  '/payment-intent/:id', auth(USER_ROLES.USER),
-  PaymentController.createPaymentIntentRaffle
-);
+router.post('/payment-intent/:id', auth(USER_ROLES.USER), PaymentController.createPaymentMothlyRaffle);
 
 //®️®️®️®️®️®️®️®️®️®️ DRAW RAFFLE 
-router.get(
-  '/random-winner_single/:id',
-  auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
-  RaffleController.getRandomWinner
-);
+router.get('/random-winner_single/:id', auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER), RaffleController.getRandomWinner);
 //®️®️®️®️®️®️®️®️®️®️ DRAW RAFFLE 
-router.get(
-  '/random-winner_multiple/:id',
-  auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
-  RaffleController.getRandomWinnerMultiple
-);
+router.get('/random-winner_multiple/:id', auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER), RaffleController.getRandomWinnerMultiple);
 //®️®️®️®️®️®️®️®️®️®️ALL winner
-router.get("/winner/:id",
-  auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
-  RaffleController.allWinner
-)
+router.get("/winner/:id", auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER), RaffleController.allWinner)
 
 
 // 🔍 Get Single Raffle by ID (Admin / Organizer)
-router.get(
-  '/:id',
-  auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
-  RaffleController.getRaffleById
-);
+router.get('/:id', auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER), RaffleController.getRaffleById);
 
 // ✏️ Update Raffle (Organizer)
-router.patch(
-  '/:id',
-  auth(...organizerAccess),
-  validateRequest(updateRaffleZodSchema),
-  RaffleController.updateRaffle
-);
+router.patch('/:id', auth(...organizerAccess), validateRequest(updateRaffleZodSchema), RaffleController.updateRaffle);
 
 // 🗑️ Delete Raffle (Admin / Organizer)
-router.delete(
-  '/:id',
-  auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER),
-  RaffleController.deleteRaffle
-);
+router.delete('/:id', auth(USER_ROLES.ADMIN, USER_ROLES.ORGANIZER), RaffleController.deleteRaffle);
 
 
 

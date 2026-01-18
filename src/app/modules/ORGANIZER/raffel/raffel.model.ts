@@ -10,9 +10,10 @@ const packageSchema = new Schema({
 const raffleSchema = new Schema(
   {
     userId: { type: Types.ObjectId, ref: 'User', },
+    raffleType: { type: String, enum: ['monthly', 'custom'], required: true },
     raffleName: { type: String },
     monthName: { type: String },
-    package: { type: packageSchema },
+    package: { type: [packageSchema] },
     organizer: {
       name: { type: String },
       email: { type: String },
@@ -39,6 +40,8 @@ const raffleSchema = new Schema(
     versionKey: false,
   }
 );
+
+
 
 const Raffle = model('Raffle', raffleSchema);
 

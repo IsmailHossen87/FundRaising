@@ -63,16 +63,14 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
           break;
         }
 
-        console.log("session", session)
-
-        console.log("metadata", metadata)
-
-
-        if ((metadata.raffleId && metadata.userId)) {
+        if ((metadata.raffleId && metadata.raffleType === 'custom')) {
           await handlePayment.handleRaffleBuy(session);
           //  Charity Donation
         } else if ((metadata.type === 'charity')) {
           await handlePayment.handleDonate(session);
+        }
+        else if ((metadata.type === 'raffle' && metadata.raffleType === 'monthly')) {
+          await handlePayment.createMonthlyRafflePaymentIntent(session);
         } else {
           logger.warn('Unknown payment type received in webhook metadata');
         }

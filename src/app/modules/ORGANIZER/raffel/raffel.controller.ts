@@ -28,6 +28,7 @@ const createRaffle = catchAsync(async (req: Request, res: Response) => {
 
 const monthlyRaffle = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id;
+
   req.body.userId = userId;
 
   const result = await RaffleService.createMonthlyRaffleToDB(req.body);
@@ -37,6 +38,19 @@ const monthlyRaffle = catchAsync(async (req: Request, res: Response) => {
     statusCode: StatusCodes.CREATED,
     message: 'Monthly Raffle created successfully',
     data: result,
+  });
+});
+
+const allMonthlyRaffle = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  const query = req.query
+  const result = await RaffleService.allMonthlyRaffle(userId as string, query as Record<string, string>);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Monthly Raffle retrived successfully',
+    data: { ...result },
   });
 });
 
@@ -159,6 +173,7 @@ export const RaffleController = {
   createRaffle,
   monthlyRaffle,
   getAllRaffles,
+  allMonthlyRaffle,
   getRaffleById,
   updateRaffle,
   deleteRaffle,

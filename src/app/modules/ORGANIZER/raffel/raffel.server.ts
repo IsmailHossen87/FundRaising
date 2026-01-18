@@ -36,22 +36,66 @@ const createRaffleToDB = async (payload: IRaffle) => {
 
 // Create raffle
 const createMonthlyRaffleToDB = async (payload: IRaffle) => {
+  // 🔹 normalize month name
+  const monthName = payload?.monthName?.trim().toLowerCase();
 
-  const isExist = await Raffle.findOne({ raffleName: payload.raffleName });
-  if (isExist) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Raffle name already exists');
+  // 🔹 regex for valid month names
+  const monthRegex = /^(january|february|march|april|may|june|july|august|september|october|november|december)$/;
+
+  if (!monthRegex.test(monthName as string)) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Invalid month name'
+    );
   }
+
+  // 🔹 duplicate check (BEST WAY)
+  const isExist = await Raffle.findOne({ monthName: monthName as string });
+
+  if (isExist) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Month name already exists'
+    );
+  }
+
+  // 🔹 user check
   const user = await User.findById(payload.userId);
   if (!user) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'User not found');
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'User not found'
+    );
   }
-  // if (!user.stripeAccountInfo?.stripeConnectedAccount) {
-  //   throw new ApiError(StatusCodes.BAD_REQUEST, 'User does not have a connected Stripe account');
-  // }
+
+  // 🔹 assign normalized value
+  payload.monthName = monthName;
+
   const result = await Raffle.create(payload);
   return result;
 };
 
+
+const allMonthlyRaffle = async (userId: string, query: Record<string, string>) => {
+
+  const queryBuilder = new QueryBuilder(Raffle.find({ raffleType: "monthly" }), query);
+
+  const allRaffles = queryBuilder
+    .search([])
+    .filter()
+    .sort()
+    .fields()
+    .paginate();
+
+  const [data, meta] = await Promise.all([
+    allRaffles.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return { meta, data };
+};
+
+// ORGANIZERS raffle
 const getAllRafflesFromDB = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Raffle.find(), query);
 
@@ -78,7 +122,6 @@ const getRaffleByIdFromDB = async (id: string) => {
   }
   return raffle;
 };
-
 
 // Get my raffle
 const getMyRaffle = async (id: string, query: Record<string, any>) => {
@@ -108,7 +151,6 @@ const getMyRaffle = async (id: string, query: Record<string, any>) => {
   return { data, meta };
 };
 
-
 // Update raffle
 const updateRaffleInDB = async (id: string, payload: Partial<IRaffle>) => {
   const updated = await Raffle.findByIdAndUpdate(id, payload, { new: true });
@@ -126,6 +168,7 @@ const deleteRaffleFromDB = async (id: string) => {
   }
   return deleted;
 };
+
 // all participant
 const allParticipant = async () => {
   const usersWithRaffle = await User.find({
@@ -258,6 +301,7 @@ export const RaffleService = {
   createRaffleToDB,
   createMonthlyRaffleToDB,
   getAllRafflesFromDB,
+  allMonthlyRaffle,
   getRaffleByIdFromDB,
   updateRaffleInDB,
   deleteRaffleFromDB,

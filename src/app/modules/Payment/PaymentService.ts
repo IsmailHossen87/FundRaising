@@ -10,6 +10,9 @@ import mongoose from "mongoose";
 interface RaffleUserData {
   userId: string;
   message?: string;
+  ticketType?: string;
+  ticketCount?: number;
+  charityId?: string;
 }
 
 interface CharityUserData {
@@ -56,11 +59,93 @@ export const createRafflePaymentIntent = async (
   // Metadata
   const metadata = {
     type: "raffle",
+    raffleType: raffle.raffleType,
     raffleId: raffle._id.toString(),
     ticketCount: String(ticketCount),
     totalAmount: String(totalAmount),
     userId: user._id.toString(),
     message: userData.message || "",
+  };
+
+  // Stripe Checkout Session
+  const stripeSession = await stripe.checkout.sessions.create({
+    mode: "payment",
+    payment_method_types: ["card"],
+    customer: stripeCustomer.id,
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: { name: productName },
+          unit_amount: Math.round(totalAmount * 100),
+        },
+        quantity: 1,
+      },
+    ],
+    metadata,
+    success_url: `${config.stripe.success_url}?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${config.stripe.cancel_url}`,
+  });
+
+  return {
+    url: stripeSession.url,
+    sessionId: stripeSession.id,
+  };
+};
+
+
+
+export const createMonthlyRafflePaymentIntent = async (
+  raffleId: string,
+  data: RaffleUserData
+) => {
+  const raffle = await Raffle.findById(raffleId);
+
+  if (!raffle) throw new ApiError(StatusCodes.NOT_FOUND, "Raffle not found!");
+  if (raffle.status === "suspended") {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "The Raffle is Suspended!");
+  }
+  if (raffle.status === "closed") {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "The Raffle is Closed!");
+  }
+
+
+  const currentDate = new Date();
+  if (raffle.ticketSaleEndDate && currentDate > new Date(raffle.ticketSaleEndDate)) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Ticket sale period is over. You can no longer purchase tickets for this raffle."
+    );
+  }
+
+  const user = await User.findById(data.userId);
+  if (!user) throw new ApiError(StatusCodes.NOT_FOUND, "User not found!");
+
+  const filter = raffle?.package?.find((m) => m.ticketType === data.ticketType);
+
+
+  const totalAmount = Number(filter?.ticketAmount) * Number(data?.ticketCount);
+
+  const productName = `Raffle Tickets - ${raffle.raffleType}`;
+
+  // Stripe Customer
+  const stripeCustomer = await stripe.customers.create({
+    name: `${user.name}`,
+    email: user.email,
+  });
+
+
+  // Metadata
+  const metadata = {
+    type: "raffle",
+    raffleType: raffle.raffleType,
+    ticketType: String(data.ticketType),
+    raffleId: raffle._id.toString(),
+    causeId: data.charityId?.toString() || "",
+    ticketCount: String(data.ticketCount),
+    totalAmount: String(totalAmount),
+    userId: user._id.toString(),
+    message: data.message || "",
   };
 
   // Stripe Checkout Session

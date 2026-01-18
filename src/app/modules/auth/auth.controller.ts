@@ -29,9 +29,34 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'User logged in successfully.',
-    data: result.createToken,
+    data: { ...result },
   });
 });
+
+
+// 🚪 Logout - Blacklist tokens
+const logOut = catchAsync(async (req: Request, res: Response) => {
+  const refreshToken = req.headers['refreshtoken'] as string;
+  const accessToken = req.headers['authorization']?.split(' ')[1];
+
+  if (!refreshToken) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "No refresh token received from header");
+  }
+
+  if (!accessToken) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "No access token received from header");
+  }
+
+  await AuthService.logout(refreshToken, accessToken);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "User logged out successfully",
+    data: null,
+  });
+});
+
 
 const forgetPassword = catchAsync(async (req: Request, res: Response) => {
   const email = req.body.email;
@@ -85,7 +110,7 @@ const googleCallbackController = catchAsync(
       redirectTo = redirectTo.slice(1);
     }
 
-    const user = req.user as any; 
+    const user = req.user as any;
     if (!user) {
       throw new ApiError(httpStatus.NOT_FOUND, "User not found");
     }
@@ -120,6 +145,7 @@ const googleCallbackController = catchAsync(
 export const AuthController = {
   verifyEmail,
   loginUser,
+  logOut,
   forgetPassword,
   resetPassword,
   changePassword,

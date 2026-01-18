@@ -1,27 +1,28 @@
-import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
-export interface IJwtPayload {
-  id: string;        
-  role: string;       
-  email?: string;      
-  iat?: number;        
-  exp?: number;        
-}
 
-// 🔐 Token তৈরি করার জন্য
+import jwt, { JwtPayload, Secret, SignOptions } from 'jsonwebtoken';
+
 const createToken = (
   payload: object,
   secret: Secret,
-  expiresIn: string
+  expireTime?: string | number
 ): string => {
-  return jwt.sign(payload, secret, { expiresIn });
+  return jwt.sign(payload, secret, {
+    expiresIn: (expireTime || '1d') as any
+  });
 };
 
-// 🔍 Token verify করার জন্য
-const verifyToken = (token: string, secret: Secret): IJwtPayload => {
-  return jwt.verify(token, secret) as IJwtPayload;
+const refreshToken = (
+  payload: object,
+  secret: Secret,
+  expireTime?: string | number
+): string => {
+  return jwt.sign(payload, secret, {
+    expiresIn: (expireTime || '7d') as any
+  });
 };
 
-export const jwtHelper = {
-  createToken,
-  verifyToken,
+const verifyToken = (token: string, secret: Secret): JwtPayload => {
+  return jwt.verify(token, secret) as JwtPayload;
 };
+
+export const jwtHelper = { createToken, refreshToken, verifyToken };

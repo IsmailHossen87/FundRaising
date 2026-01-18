@@ -6,6 +6,7 @@ import config from './config';
 import { socketHelper } from './helpers/socketHelper';
 import { errorLogger, logger } from './shared/logger';
 import { connectRedis } from './config/radisConfig';
+import { startRaffleCron } from './app/modules/ORGANIZER/raffel/closeRaffle';
 
 // 🔴 Handle uncaught exceptions (synchronous errors)
 process.on('uncaughtException', error => {
@@ -39,6 +40,8 @@ async function main() {
     });
 
     socketHelper.socket(io);
+    startRaffleCron();
+
     //@ts-ignore
     global.io = io;
 

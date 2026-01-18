@@ -57,9 +57,59 @@ const loginUserFromDB = async (payload: ILoginData) => {
     config.jwt.jwt_expire_in as string
   );
 
-  return { createToken };
+  const refreshToken = jwtHelper.refreshToken(
+    { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
+    config.jwt.jwt_secret as Secret,
+    config.jwt.jwt_expire_in as string
+  );
+  return { createToken, refreshToken };
 };
 
+// 🚪 Logout - Blacklist both tokens
+const logout = async (refreshToken: string, accessToken: string) => {
+  // Verify refresh token
+  const decoded = jwtHelper.verifyToken(
+    refreshToken,
+    config.jwt.jwt_secret as Secret
+  ) as {
+    id: string;
+    role: string;
+    email: string;
+    exp: number;
+  };
+
+  if (!decoded?.id || !decoded?.role || !decoded?.email) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token payload");
+  }
+
+  // Verify access token
+  const accessDecoded = jwtHelper.verifyToken(
+    accessToken,
+    config.jwt.jwt_secret as Secret
+  ) as {
+    id: string;
+    role: string;
+    email: string;
+    exp: number;
+  };
+
+  if (!accessDecoded?.id) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid access token payload");
+  }
+
+  // Delete refresh token from Redis
+  await redisClient.del(`refreshToken:${decoded.id}`);
+
+  // Blacklist access token in Redis with TTL (until token expires)
+  const currentTime = Math.floor(Date.now() / 1000);
+  const ttl = accessDecoded.exp - currentTime;
+
+  if (ttl > 0) {
+    await redisClient.setEx(`blacklist:${accessToken}`, ttl, 'revoked');
+  }
+
+  return null;
+};
 
 // Verify Email or OTP
 
@@ -238,10 +288,11 @@ const changePasswordToDB = async (
 };
 
 
- export const AuthService = {
+export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
   forgetPasswordToDB,
   resetPasswordToDB,
   changePasswordToDB,
+  logout
 };

@@ -5,13 +5,11 @@ export const updateRaffleZodSchema = z.object({
   body: z.object({
     raffleName: z.string().optional(),
     monthName: z.string().optional(),
-    package: z
-      .object({
-        ticketType: z.enum(['Premium', 'Standard', 'Basic']).optional(),
-        ticketQuantity: z.number().optional(),
-        ticketAmount: z.number().optional(),
-      })
-      .optional(),
+    package: z.array(z.object({
+      ticketType: z.enum(['Premium', 'Standard', 'Basic']).optional(),
+      ticketQuantity: z.number().optional(),
+      ticketAmount: z.number().optional(),
+    })).optional(),
     organizer: z
       .object({
         name: z.string().optional(),

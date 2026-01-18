@@ -166,9 +166,17 @@ const handleDonate = async (session: Stripe.Checkout.Session) => {
   }
 };
 
+
+// 🎉🎊Monthly Raffle
+const createMonthlyRafflePaymentIntent = async (session: Stripe.Checkout.Session) => {
+  const { raffleId, ticketCount, userId, totalAmount, message }: any = session.metadata;
+
+  console.log("Monthly Raffle Payment Intent -------------------2------------------", session.metadata);
+}
 export const handlePayment = {
   paymentSuccess,
   paymentCancel,
   handleRaffleBuy,
   handleDonate,
+  createMonthlyRafflePaymentIntent,
 };

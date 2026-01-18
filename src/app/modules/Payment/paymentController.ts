@@ -3,7 +3,7 @@ import sendResponse from "../../../shared/sendResponse";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import ApiError from "../../../errors/ApiError";
-import { createCharityPaymentIntent, createRafflePaymentIntent } from "./PaymentService";
+import { createCharityPaymentIntent, createMonthlyRafflePaymentIntent, createRafflePaymentIntent } from "./PaymentService";
 
 // ---------------- Raffle ----------------
 const createPaymentIntentRaffle = catchAsync(
@@ -28,6 +28,45 @@ const createPaymentIntentRaffle = catchAsync(
       raffleId,
       ticketCount,
       { userId: req.user?.id, message }
+    );
+
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Redirect to payment",
+      data: paymentSession,
+    });
+  }
+);
+
+const createPaymentMothlyRaffle = catchAsync(
+  async (req: Request, res: Response) => {
+    const raffleId = req.params.id;
+
+    if (!req.user)
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        "You must be logged in to buy raffle"
+      );
+
+    const ticketCount = Number(req.body.package?.ticketQuantity);
+    const ticketType = req.body.package?.ticketType;
+
+    if (!ticketCount || ticketCount <= 0)
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Ticket count must be greater than 0"
+      );
+    const data = {
+      userId: req.user?.id,
+      ticketType,
+      ticketCount,
+      charityId: req.body?.charityId
+    }
+
+    const paymentSession = await createMonthlyRafflePaymentIntent(
+      raffleId,
+      data
     );
 
     sendResponse(res, {
@@ -69,4 +108,5 @@ const createPaymentIntentCause = catchAsync(
 export const PaymentController = {
   createPaymentIntentRaffle,
   createPaymentIntentCause,
+  createPaymentMothlyRaffle
 };

@@ -9,7 +9,8 @@ interface IPackage {
 export type IRaffle = {
   userId: Types.ObjectId;
   monthName?: string,
-  package?: IPackage,
+  package?: IPackage[],
+  raffleType: "monthly" | "custom",
   raffleName: string;
   organizer?: {
     name: string;
