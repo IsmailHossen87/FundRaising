@@ -148,11 +148,15 @@ export const createMonthlyRafflePaymentIntent = async (
     message: data.message || "",
   };
 
+
+
+
   // Stripe Checkout Session
   const stripeSession = await stripe.checkout.sessions.create({
     mode: "payment",
     payment_method_types: ["card"],
     customer: stripeCustomer.id,
+
     line_items: [
       {
         price_data: {
@@ -163,10 +167,62 @@ export const createMonthlyRafflePaymentIntent = async (
         quantity: 1,
       },
     ],
+    // const paymentIntent = await stripe.paymentIntents.create({  ---------- direct Admin Pabe ja amar kora ase      1111
+    //   amount: Math.round(totalAmount * 100),
+    //   currency: "usd",
+    //   metadata: {
+    //     raffleId: raffle._id.toString(),
+    //     organizerStripeAccountId,
+    //     type: "raffle",
+    //   },
+    // });
+
+
+
+    // payment_intent_data: {    22222222222
+    //   application_fee_amount: Math.round(totalAmount * 0.10 * 100),  //10% admeen fee katbe
+    //   transfer_data: {
+    //     destination: organizerStripeAccountId,
+    //   },
+    // },
+
+
+    // 🎊webhook                               ja amader kora aseeeeeeeee        11111
+    //   case "checkout.session.completed": {
+    //   const session = event.data.object as Stripe.Checkout.Session;
+
+    //   if (session.payment_status !== "paid") return;
+
+    //   await handleRaffleBuy(session);
+    //   break;
+    // }
+
+    // case "payment_intent.succeeded": {         222222222222222
+    //   const intent = event.data.object as Stripe.PaymentIntent;
+
+    //   const organizerStripeAccountId =
+    //     intent.metadata.organizerStripeAccountId;
+
+    //   const organizerAmount = Math.round(intent.amount * 0.9);
+
+    //   await stripe.transfers.create({
+    //     amount: organizerAmount,
+    //     currency: "usd",
+    //     destination: organizerStripeAccountId,
+    //     source_transaction: intent.latest_charge as string,
+    //   });
+
+    //   break;
+    // }
+
     metadata,
     success_url: `${config.stripe.success_url}?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${config.stripe.cancel_url}`,
   });
+
+
+
+
 
   return {
     url: stripeSession.url,

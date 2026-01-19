@@ -35,6 +35,59 @@ const generateTicketCode = (userId: string, raffleId: string): string => {
   return hash.substring(0, 6).toUpperCase();
 };
 
+// DONATE - Payment Success Handler
+const handleDonate = async (session: Stripe.Checkout.Session) => {
+  const { causeId, amount, firstName, surName, email, message }: any =
+    session.metadata;
+
+  try {
+    // ✅ 1. Create verified donor after payment success
+    const donor = await Dooner.create({
+      firstName,
+      surName,
+      email,
+      message,
+      totalAmount: Number(amount),
+      paymentStatus: 'completed',
+      verified: true,
+      causeId: new mongoose.Types.ObjectId(causeId),
+      stripeSessionId: session.id,
+      paymentIntentId: session.payment_intent,
+    });
+
+    // ✅ 2. Update Charity collection
+    const charity = await Charities.findByIdAndUpdate(
+      causeId,
+      {
+        $inc: { Totalcollection: Number(amount) },
+        $addToSet: { donner: donor._id },
+      },
+      { new: true }
+    );
+
+    if (!charity)
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Charity not found');
+
+    // ✅ 3. Send confirmation email
+    const values = {
+      name: `${donor.firstName} ${donor.surName}`,
+      email: donor.email,
+      amount: donor.totalAmount,
+      causeName: charity.pageTitle || charity.causeName,
+      causeImage: charity.coverImage,
+    };
+
+    const CongratulationEmail = emailTemplate.donationConfirmation(values);
+    await emailHelper.sendEmail(CongratulationEmail);
+
+    console.log('✅ Donation successful, donor created & verified!');
+  } catch (error) {
+    console.error('❌ Error in handleDonate:', error);
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Donation processing failed');
+  }
+};
+
+
 
 // RAFFLE
 const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
@@ -57,6 +110,7 @@ const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
       $inc: { sold: ticket, amount: TotalAmount },
       $addToSet: { ticketBuyers: user._id, buyerMessage: message },
     });
+
     await User.findByIdAndUpdate(userId, {
       $inc: { ticket: ticket, totalAmount: TotalAmount },
       $addToSet: { raffleId: raffleId },
@@ -114,65 +168,96 @@ const handleRaffleBuy = async (session: Stripe.Checkout.Session) => {
   }
 };
 
-// DONATE - Payment Success Handler
-const handleDonate = async (session: Stripe.Checkout.Session) => {
-  const { causeId, amount, firstName, surName, email, message }: any =
-    session.metadata;
-
-  try {
-    // ✅ 1. Create verified donor after payment success
-    const donor = await Dooner.create({
-      firstName,
-      surName,
-      email,
-      message,
-      totalAmount: Number(amount),
-      paymentStatus: 'completed',
-      verified: true,
-      causeId: new mongoose.Types.ObjectId(causeId),
-      stripeSessionId: session.id,
-      paymentIntentId: session.payment_intent,
-    });
-
-    // ✅ 2. Update Charity collection
-    const charity = await Charities.findByIdAndUpdate(
-      causeId,
-      {
-        $inc: { Totalcollection: Number(amount) },
-        $addToSet: { donner: donor._id },
-      },
-      { new: true }
-    );
-
-    if (!charity)
-      throw new ApiError(StatusCodes.NOT_FOUND, 'Charity not found');
-
-    // ✅ 3. Send confirmation email
-    const values = {
-      name: `${donor.firstName} ${donor.surName}`,
-      email: donor.email,
-      amount: donor.totalAmount,
-      causeName: charity.pageTitle || charity.causeName,
-      causeImage: charity.coverImage,
-    };
-
-    const CongratulationEmail = emailTemplate.donationConfirmation(values);
-    await emailHelper.sendEmail(CongratulationEmail);
-
-    console.log('✅ Donation successful, donor created & verified!');
-  } catch (error) {
-    console.error('❌ Error in handleDonate:', error);
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Donation processing failed');
-  }
-};
-
-
 // 🎉🎊Monthly Raffle
 const createMonthlyRafflePaymentIntent = async (session: Stripe.Checkout.Session) => {
-  const { raffleId, ticketCount, userId, totalAmount, message }: any = session.metadata;
+  const { raffleId, ticketCount, causeId, userId, totalAmount, ticketType, raffleType }: any = session.metadata;
 
-  console.log("Monthly Raffle Payment Intent -------------------2------------------", session.metadata);
+  try {
+    const raffle = await Raffle.findById(raffleId);
+    const cause = await Charities.findById(causeId);
+    const user = await User.findById(userId);
+
+    if (!raffle) throw new ApiError(StatusCodes.NOT_FOUND, 'Raffle not found!');
+    if (!cause) throw new ApiError(StatusCodes.NOT_FOUND, 'Cause not found!');
+    if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!');
+
+    // MAIN LOGIN-----------------
+    // 🎯 Update raffle info
+    await Raffle.findByIdAndUpdate(raffleId, {
+      $inc: { sold: ticketCount, amount: totalAmount },
+      $addToSet: { ticketBuyers: user._id },
+    });
+
+    await User.findByIdAndUpdate(userId, {
+      $inc: { ticket: ticketCount, totalAmount: totalAmount },
+      $addToSet: { raffleId: raffleId },
+    });
+    // 🎟️ Generate tickets
+    const generatedTickets = Array.from({ length: ticketCount }, () =>
+      generateTicketCode(user._id.toString(), raffle._id.toString())
+    );
+
+    await Allticket.insertMany(
+      generatedTickets.map((code) => ({
+        userId: user._id,
+        raffleId: raffle._id,
+        uniqueCode: code,
+        drawDate: raffle.drawDate,
+      }))
+    );
+
+    // ✉️ Send confirmation email
+    const value = {
+      name: user.name,
+      email: user.email,
+      totalTicket: ticketCount,
+      TotalTaka: totalAmount,
+      ticketCodes: generatedTickets,
+    };
+
+    const charityOwnerAmount = (totalAmount * 60) / 100;
+    const platformAdminAmount = (totalAmount * 10) / 100;
+    const raffleCreatorAmount = (totalAmount * 30) / 100;
+
+    await cause.updateOne({
+      $inc: { raffleFundAmount: totalAmount },
+    });
+
+    const CongratulationEmail = emailTemplate.raffleConfirmation(value);
+    await emailHelper.sendEmail(CongratulationEmail);
+
+    await TransactionHistories.create({
+      charityId: raffle.causeId,
+      charityUserId: (raffle?.causeId as any)?.userId,
+      buyerId: user._id,
+      raffleId: raffle._id,
+      totalPaidAmount: totalAmount,
+      charityOwnerAmount,
+      platformAdminAmount,
+      raffleCreatorAmount,
+      platformFee: 10,
+      paymentMethod: 'stripe',
+      paymentStatus: 'completed',
+      transactionId: session.id,
+      totalTicket: ticketCount,
+    });
+
+    console.log("✅ Raffle updated successfully for signed-up user!");
+
+
+
+
+
+
+  } catch (error) {
+    console.error("❌ Error in handleRaffleBuy:", error);
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Raffle purchase failed");
+  }
+
+
 }
+
+
 export const handlePayment = {
   paymentSuccess,
   paymentCancel,

@@ -5,8 +5,8 @@ import catchAsync from '../../../shared/catchAsync';
 import { getSingleFilePath } from '../../../shared/getFilePath';
 import sendResponse from '../../../shared/sendResponse';
 import { UserService } from './user.service';
-import { IUser } from './user.interface';
-import { IJwtPayload } from '../../../helpers/jwtHelper';
+import { JwtPayload } from 'jsonwebtoken';
+
 
 
 
@@ -26,7 +26,7 @@ const createUser = catchAsync(
 
 const getUserProfile = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
-  const result = await UserService.getUserProfileFromDB(user as IJwtPayload);
+  const result = await UserService.getUserProfileFromDB(user as JwtPayload);
 
   sendResponse(res, {
     success: true,
@@ -68,7 +68,7 @@ const updateProfile = catchAsync(
       image,
       ...req.body,
     };
-    const result = await UserService.updateProfileToDB(user as IJwtPayload, data);
+    const result = await UserService.updateProfileToDB(user as JwtPayload, data);
 
     sendResponse(res, {
       success: true,

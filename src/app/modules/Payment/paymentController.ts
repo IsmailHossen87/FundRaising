@@ -3,7 +3,7 @@ import sendResponse from "../../../shared/sendResponse";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import ApiError from "../../../errors/ApiError";
-import { createCharityPaymentIntent, createMonthlyRafflePaymentIntent, createRafflePaymentIntent } from "./PaymentService";
+import { createCharityPaymentIntent, createMonthlyRafflePaymentIntent, createRafflePaymentIntent } from "../Payout/PaymentService";
 
 // ---------------- Raffle ----------------
 const createPaymentIntentRaffle = catchAsync(

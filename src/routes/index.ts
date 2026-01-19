@@ -9,6 +9,7 @@ import { fundRiaseRouter } from '../app/modules/user/FundRaise/FundRaiseRoute';
 import { PaymentRouter } from '../app/modules/Payment/Payment.route';
 import { SettingRouter } from '../app/modules/Setting/SettingRouter';
 import stripeAccountRoutes from '../app/modules/stripeAccount/stripeAccount.route';
+import { PayoutRouter } from '../app/modules/Payout/payout.router';
 
 const router = express.Router();
 
@@ -32,6 +33,9 @@ const apiRoutes = [
   {
     path: '/action',
     route: ActionRouters,
+  }, {
+    path: '/payout',
+    route: PayoutRouter,
   },
   {
     path: '/cause',

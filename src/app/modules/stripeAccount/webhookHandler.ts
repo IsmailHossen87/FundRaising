@@ -35,7 +35,7 @@ const webhookHandler = async (req: Request, res: Response): Promise<void> => {
   try {
     switch (event.type) {
       // ======================================
-      // ✅ CHECKOUT PAYMENT COMPLETED
+      // ✅ CHECKOUT PAYMENT COMPLETED 🈯🈯🈯🈯🈯🈯🈯🈯🈯🈯🈯🈯🈯🈯🈯
       // ======================================
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;

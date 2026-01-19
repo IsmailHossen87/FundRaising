@@ -41,6 +41,7 @@ export interface ICause extends Document {
   phone?: string;
   termsAccepted?: boolean;
   Totalcollection?: number;
+  raffleFundAmount?: number;
 
   role: 'ORGANIZER';
 

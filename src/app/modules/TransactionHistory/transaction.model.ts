@@ -32,9 +32,12 @@ interface IRafflePayment {
     raffleCreatorAmount: number;
     platformFee: number;
     paymentMethod: PaymentMethod;
-    paymentStatus: PaymentStatus;
+    paymentStatus: "pending" | "completed" | "failed";
     transactionId: string;
     totalTicket: number;
+    organizerStripeAccountId: string;
+    payoutStatus: "pending" | "paid";
+    payoutDate: Date;
     createdAt: Date;
     updatedAt: Date;
 }
